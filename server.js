@@ -13,24 +13,86 @@ app.use(express.static(__dirname));
 
 let pool;
 
-// Initialize Database & Table
-async function initializeDatabase() {
+// Helper to extract database connection config from env / DATABASE_URL
+function getDatabaseConfig() {
+  if (process.env.DATABASE_URL) {
+    try {
+      const dbUrl = new URL(process.env.DATABASE_URL);
+      const isLocal = dbUrl.hostname === '127.0.0.1' || dbUrl.hostname === 'localhost';
+      return {
+        host: dbUrl.hostname,
+        port: parseInt(dbUrl.port, 10) || 3306,
+        user: decodeURIComponent(dbUrl.username),
+        password: decodeURIComponent(dbUrl.password),
+        database: dbUrl.pathname.replace(/^\//, '') || process.env.DB_NAME || 'promotersdatadb',
+        ssl: (process.env.DB_SSL === 'true' || (!isLocal && process.env.DB_SSL !== 'false')) 
+          ? { rejectUnauthorized: false } 
+          : undefined
+      };
+    } catch (err) {
+      console.warn('⚠️ Could not parse DATABASE_URL, falling back to individual DB environment variables:', err.message);
+    }
+  }
+
   const host = process.env.DB_HOST || '127.0.0.1';
-  const port = process.env.DB_PORT || 3306;
-  const user = process.env.DB_USER || 'root';
+  const port = parseInt(process.env.DB_PORT, 10) || (host.includes('aiven') ? 18515 : 3306);
+  const user = process.env.DB_USER || (host.includes('aiven') ? 'avnadmin' : 'root');
   const password = process.env.DB_PASSWORD || '';
-  const database = process.env.DB_NAME || 'samantha_graph';
+  const database = process.env.DB_NAME || 'promotersdatadb';
+  const isLocal = host === '127.0.0.1' || host === 'localhost';
+  const ssl = (process.env.DB_SSL === 'true' || (!isLocal && process.env.DB_SSL !== 'false'))
+    ? { rejectUnauthorized: false }
+    : undefined;
+
+  return { host, port, user, password, database, ssl };
+}
+
+// Initialize Database & Tables
+async function initializeDatabase() {
+  const dbConfig = getDatabaseConfig();
+  console.log(`🔌 Connecting to MySQL database at ${dbConfig.host}:${dbConfig.port} (DB: ${dbConfig.database}, User: ${dbConfig.user}, SSL: ${dbConfig.ssl ? 'Enabled' : 'Disabled'})...`);
 
   try {
-    // Connect to MySQL server first without selecting DB
-    const connection = await mysql.createConnection({ host, port, user, password });
-    
-    // Create DB if not exists
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
-    await connection.query(`USE \`${database}\`;`);
-    
-    // Create promoters table if not exists
-    const createTableQuery = `
+    // 1. Check direct connection to database
+    let connection;
+    try {
+      connection = await mysql.createConnection({
+        host: dbConfig.host,
+        port: dbConfig.port,
+        user: dbConfig.user,
+        password: dbConfig.password,
+        database: dbConfig.database,
+        ssl: dbConfig.ssl
+      });
+    } catch (connErr) {
+      // If DB doesn't exist on local server, attempt creating it (only on local environments)
+      if (connErr.code === 'ER_BAD_DB_ERROR' && (dbConfig.host === '127.0.0.1' || dbConfig.host === 'localhost')) {
+        console.log(`Creating database '${dbConfig.database}' locally...`);
+        const rootConn = await mysql.createConnection({
+          host: dbConfig.host,
+          port: dbConfig.port,
+          user: dbConfig.user,
+          password: dbConfig.password,
+          ssl: dbConfig.ssl
+        });
+        await rootConn.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\`;`);
+        await rootConn.end();
+
+        connection = await mysql.createConnection({
+          host: dbConfig.host,
+          port: dbConfig.port,
+          user: dbConfig.user,
+          password: dbConfig.password,
+          database: dbConfig.database,
+          ssl: dbConfig.ssl
+        });
+      } else {
+        throw connErr;
+      }
+    }
+
+    // 2. Ensure promoters table exists
+    const createPromotersTableQuery = `
       CREATE TABLE IF NOT EXISTS promoters (
         id VARCHAR(50) PRIMARY KEY,
         fullName VARCHAR(255) NOT NULL,
@@ -43,9 +105,9 @@ async function initializeDatabase() {
         UNIQUE KEY unique_mobile (mobileNumber)
       );
     `;
-    await connection.query(createTableQuery);
+    await connection.query(createPromotersTableQuery);
 
-    // Create hierarchy_locations table if not exists
+    // 3. Ensure hierarchy_locations table exists
     const createHierarchyTableQuery = `
       CREATE TABLE IF NOT EXISTS hierarchy_locations (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,24 +117,29 @@ async function initializeDatabase() {
       );
     `;
     await connection.query(createHierarchyTableQuery);
-
     await connection.end();
-    
-    console.log(`Database and tables verified/created in MySQL.`);
 
-    // Create pool for subsequent requests
+    console.log(`✅ Database connected successfully! Verified 'promoters' and 'hierarchy_locations' tables.`);
+
+    // 4. Create connection pool for handling API requests
     pool = mysql.createPool({
-      host,
-      port,
-      user,
-      password,
-      database,
+      host: dbConfig.host,
+      port: dbConfig.port,
+      user: dbConfig.user,
+      password: dbConfig.password,
+      database: dbConfig.database,
+      ssl: dbConfig.ssl,
       waitForConnections: true,
       connectionLimit: 10,
-      queueLimit: 0
+      queueLimit: 0,
+      connectTimeout: 20000
     });
+
   } catch (error) {
-    console.error('Failed to initialize database:', error.message);
+    console.error('❌ Failed to initialize database:');
+    console.error(`   Error Code: ${error.code || 'UNKNOWN'}`);
+    console.error(`   Message:    ${error.message}`);
+    console.error('   Please check your DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, and DB_NAME environment variables.');
     process.exit(1);
   }
 }
@@ -93,17 +160,21 @@ function mapRowToPromoter(row) {
   };
 }
 
-// Endpoints
+// ==========================================
+// REST API Endpoints
+// ==========================================
 
 // 0. GET HIERARCHY LOCATIONS
 app.get('/api/hierarchy', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT district, zone, circle FROM hierarchy_locations ORDER BY district, zone, circle');
     const hierarchy = {};
+    
     rows.forEach(row => {
       const d = row.district ? row.district.trim() : '';
       const z = row.zone ? row.zone.trim() : '';
       const c = row.circle ? row.circle.trim() : '';
+      
       if (!d) return;
       if (!hierarchy[d]) hierarchy[d] = {};
       if (z) {
@@ -113,6 +184,7 @@ app.get('/api/hierarchy', async (req, res) => {
         }
       }
     });
+
     res.json({ hierarchy, count: rows.length, list: rows });
   } catch (error) {
     console.error('GET /api/hierarchy error:', error);
@@ -284,6 +356,6 @@ app.delete('/api/promoters', async (req, res) => {
 // Start Server after database initialization
 initializeDatabase().then(() => {
   app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
+    console.log(`🚀 Server is running at http://localhost:${PORT}`);
   });
 });
