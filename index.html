@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Samantha Graph Promoters Data Collection Form</title>
+  
+  <!-- Tailwind CSS v4 CDN -->
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  
+  <!-- Plus Jakarta Sans Font for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons for modern visuals -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    /* Subtle background grid pattern for visual depth */
+    .bg-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    }
+    .dark .bg-grid {
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+    /* Smooth transitions for conditional inputs */
+    .transition-all-custom {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="h-full bg-slate-900 text-slate-100 flex flex-col justify-between overflow-x-hidden relative bg-grid">
+  
+  <!-- Animated glow blobs in background -->
+  <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none"></div>
+  <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none"></div>
+
+
+
+  <!-- Main Content -->
+  <main class="flex-grow flex items-center justify-center px-4 py-8 z-10">
+    <div class="w-full max-w-xl">
+      
+      <!-- Card Container -->
+      <div class="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-slate-950/50 relative overflow-hidden transition-all duration-300">
+        
+        <!-- Header info inside card -->
+        <div class="mb-8 text-center sm:text-left">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            Promoters Data Form
+          </h2>
+          <p class="text-sm text-slate-400 mt-2">
+            Register promoters and configure administrative access hierarchy. All fields marked with <span class="text-rose-500">*</span> are required.
+          </p>
+        </div>
+
+        <!-- Form Element -->
+        <form id="data-form" novalidate class="space-y-6">
+          
+          <!-- Full Name Input -->
+          <div class="space-y-2">
+            <label for="fullName" class="block text-sm font-semibold text-slate-200">
+              Full Name <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative rounded-xl shadow-sm">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <i class="fa-regular fa-user text-slate-400" id="name-icon"></i>
+              </div>
+              <input 
+                type="text" 
+                id="fullName" 
+                name="fullName"
+                required
+                placeholder="Enter promoter's full name" 
+                class="block w-full pl-11 pr-10 py-3.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm"
+              >
+              <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+                <i class="fa-solid fa-circle-check text-emerald-500 hidden" id="name-valid"></i>
+                <i class="fa-solid fa-circle-exclamation text-rose-500 hidden" id="name-invalid"></i>
+              </div>
+            </div>
+            <p id="name-error" class="text-xs text-rose-400 mt-1 hidden"></p>
+          </div>
+
+          <!-- Mobile Number Input -->
+          <div class="space-y-2">
+            <label for="mobileNumber" class="block text-sm font-semibold text-slate-200">
+              Mobile Number <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative rounded-xl shadow-sm">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <i class="fa-solid fa-phone text-slate-400" id="phone-icon"></i>
+              </div>
+              <input 
+                type="tel" 
+                id="mobileNumber" 
+                name="mobileNumber"
+                required
+                maxlength="10"
+                placeholder="10-digit mobile number" 
+                class="block w-full pl-11 pr-10 py-3.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm"
+              >
+              <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+                <i class="fa-solid fa-circle-check text-emerald-500 hidden" id="phone-valid"></i>
+                <i class="fa-solid fa-circle-exclamation text-rose-500 hidden" id="phone-invalid"></i>
+              </div>
+            </div>
+            <p id="phone-error" class="text-xs text-rose-400 mt-1 hidden">Please enter a valid 10-digit mobile number.</p>
+          </div>
+
+          <!-- Level Selection Dropdown -->
+          <div class="space-y-2">
+            <label for="levelSelection" class="block text-sm font-semibold text-slate-200">
+              Level Selection <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative rounded-xl shadow-sm">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <i class="fa-solid fa-sitemap text-slate-400"></i>
+              </div>
+              <select 
+                id="levelSelection" 
+                name="levelSelection"
+                required
+                class="block w-full pl-11 pr-10 py-3.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm appearance-none cursor-pointer"
+              >
+                <option value="" disabled selected hidden>Select Level</option>
+                <option value="District">District</option>
+                <option value="Zone">Zone</option>
+                <option value="Circle">Circle</option>
+              </select>
+              <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+                <i class="fa-solid fa-chevron-down text-slate-400"></i>
+              </div>
+            </div>
+            <p id="level-error" class="text-xs text-rose-400 mt-1 hidden"></p>
+          </div>
+
+          <!-- DYNAMIC ADMINISTRATIVE HIERARCHY FIELDS -->
+          <div id="dynamic-dropdowns-container" class="space-y-4 hidden transition-all-custom">
+            
+            <!-- District Dropdown -->
+            <div id="district-group" class="space-y-2 hidden opacity-0 translate-y-2 transition-all-custom">
+              <label for="districtSelect" class="block text-sm font-semibold text-slate-200">
+                District <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative rounded-xl shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <i class="fa-solid fa-location-dot text-slate-400"></i>
+                </div>
+                <select 
+                  id="districtSelect" 
+                  name="district"
+                  class="block w-full pl-11 pr-10 py-3.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm appearance-none cursor-pointer"
+                >
+                  <option value="" disabled selected hidden>Select District</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+                  <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                </div>
+              </div>
+              <p id="district-error" class="text-xs text-rose-400 mt-1 hidden">Please select a district.</p>
+            </div>
+
+            <!-- Zone Dropdown -->
+            <div id="zone-group" class="space-y-2 hidden opacity-0 translate-y-2 transition-all-custom">
+              <label for="zoneSelect" class="block text-sm font-semibold text-slate-200">
+                Zone <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative rounded-xl shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <i class="fa-solid fa-layer-group text-slate-400"></i>
+                </div>
+                <select 
+                  id="zoneSelect" 
+                  name="zone"
+                  disabled
+                  class="block w-full pl-11 pr-10 py-3.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm appearance-none cursor-pointer"
+                >
+                  <option value="" disabled selected hidden>Select Zone (Select District first)</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+                  <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                </div>
+              </div>
+              <p id="zone-error" class="text-xs text-rose-400 mt-1 hidden">Please select a zone.</p>
+            </div>
+
+            <!-- Circle Dropdown -->
+            <div id="circle-group" class="space-y-2 hidden opacity-0 translate-y-2 transition-all-custom">
+              <label for="circleSelect" class="block text-sm font-semibold text-slate-200">
+                Circle <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative rounded-xl shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <i class="fa-solid fa-circle-dot text-slate-400"></i>
+                </div>
+                <select 
+                  id="circleSelect" 
+                  name="circle"
+                  disabled
+                  class="block w-full pl-11 pr-10 py-3.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm appearance-none cursor-pointer"
+                >
+                  <option value="" disabled selected hidden>Select Circle (Select Zone first)</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+                  <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                </div>
+              </div>
+              <p id="circle-error" class="text-xs text-rose-400 mt-1 hidden">Please select a circle.</p>
+            </div>
+
+          </div>
+
+          <!-- Submit Button -->
+          <button 
+            type="submit" 
+            class="w-full py-4 px-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:to-pink-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-indigo-500 active:scale-[0.98] transition-all duration-200 text-sm flex items-center justify-center space-x-2 cursor-pointer mt-4"
+          >
+            <span>Submit Registration</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+
+        </form>
+
+      </div>
+      
+    </div>
+  </main>
+
+  <!-- Custom Success Modal (Replaces browser alert with responsive, gorgeous UI) -->
+  <div id="success-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-opacity duration-300 opacity-0">
+    <div class="bg-slate-800 border border-slate-700 w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden transform scale-95 transition-transform duration-300 space-y-6">
+      
+      <!-- Colored accent top bar -->
+      <div class="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
+
+      <!-- Icon & Header -->
+      <div class="text-center space-y-3">
+        <div class="mx-auto w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 shadow-lg shadow-emerald-500/10">
+          <i class="fa-solid fa-circle-check text-3xl animate-bounce"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white">Submission Successful!</h3>
+        <p class="text-sm text-slate-400">The promoter data has been logged to the console.</p>
+      </div>
+
+      <!-- (JSON display removed) -->
+
+      <!-- Actions -->
+      <div class="pt-2">
+        <button 
+          id="close-modal" 
+          class="w-full py-3 px-4 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-xl transition-all duration-200 text-sm cursor-pointer"
+        >
+          Register Another Promoter
+        </button>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="w-full py-6 text-center text-xs text-slate-500 z-10 border-t border-slate-800/40">
+    <p>&copy; 2026 Samantha Graph Network. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // --- DEFAULT / FALLBACK HIERARCHY DATA ---
+    let ADMIN_DATA = {
+      "Thiruvananthapuram": {
+        "Trivandrum Corporation": ["Cantonment Circle", "Medical College Circle", "Fort Circle"],
+        "Trivandrum Rural": ["Neyyattinkara Circle", "Nedumangad Circle", "Attingal Circle"]
+      },
+      "Kollam": {
+        "Kollam City": ["Kollam East Circle", "Kollam West Circle"],
+        "Kollam Rural": ["Karunagappally Circle", "Kottarakkara Circle", "Punalur Circle"]
+      },
+      "Pathanamthitta": {
+        "Pathanamthitta Central": ["Pathanamthitta Circle", "Adoor Circle"],
+        "Pathanamthitta North": ["Thiruvalla Circle", "Mallappally Circle"]
+      },
+      "Alappuzha": {
+        "Alappuzha North": ["Cherthala Circle", "Ambalappuzha Circle"],
+        "Alappuzha South": ["Kayamkulam Circle", "Mavelikkara Circle", "Chengannur Circle"]
+      },
+      "Kottayam": {
+        "Kottayam West": ["Kottayam Town Circle", "Changanassery Circle"],
+        "Kottayam East": ["Kanjirappally Circle", "Pala Circle", "Vaikom Circle"]
+      },
+      "Idukki": {
+        "Idukki Highrange": ["Thodupuzha Circle", "Munnar Circle"],
+        "Idukki Lowrange": ["Kattappana Circle", "Adimaly Circle"]
+      },
+      "Ernakulam": {
+        "Kochi City": ["Ernakulam Central Circle", "Mattancherry Circle", "Thrikkakara Circle"],
+        "Ernakulam Rural": ["Aluva Circle", "Perumbavoor Circle", "Muvattupuzha Circle"]
+      },
+      "Thrissur": {
+        "Thrissur City": ["Thrissur Town Circle", "Ollur Circle"],
+        "Thrissur Rural": ["Irinjalakuda Circle", "Chalakudy Circle", "Kunnamkulam Circle"]
+      },
+      "Palakkad": {
+        "Palakkad Central": ["Palakkad Circle", "Alathur Circle"],
+        "Palakkad East": ["Ottapalam Circle", "Mannarkkad Circle", "Shoranur Circle"]
+      },
+      "Malappuram": {
+        "Malappuram North": ["Manjeri Circle", "Nilambur Circle"],
+        "Malappuram South": ["Tirur Circle", "Ponnani Circle", "Kottakkal Circle"]
+      },
+      "Kozhikode": {
+        "Kozhikode City": ["Kozhikode Town Circle", "Chevayur Circle", "Medical College Calicut Circle"],
+        "Kozhikode Rural": ["Vadakara Circle", "Koyilandy Circle", "Thamarassery Circle"]
+      },
+      "Wayanad": {
+        "Wayanad North": ["Mananthavady Circle", "Sulthan Bathery Circle"],
+        "Wayanad South": ["Kalpetta Circle", "Vythiri Circle"]
+      },
+      "Kannur": {
+        "Kannur City": ["Kannur Town Circle", "Taliparamba Circle"],
+        "Kannur Rural": ["Payyannur Circle", "Thalassery Circle", "Iritty Circle"]
+      },
+      "Kasaragod": {
+        "Kasaragod North": ["Kasaragod Circle", "Kanhangad Circle"],
+        "Kasaragod South": ["Nileshwaram Circle", "Kumbla Circle"]
+      }
+    };
+
+    // --- DOM ELEMENTS ---
+    const form = document.getElementById('data-form');
+    const fullNameInput = document.getElementById('fullName');
+    const mobileInput = document.getElementById('mobileNumber');
+    const levelSelect = document.getElementById('levelSelection');
+    
+    const dynamicContainer = document.getElementById('dynamic-dropdowns-container');
+    const districtGroup = document.getElementById('district-group');
+    const zoneGroup = document.getElementById('zone-group');
+    const circleGroup = document.getElementById('circle-group');
+    
+    const districtSelect = document.getElementById('districtSelect');
+    const zoneSelectEl = document.getElementById('zoneSelect');
+    const circleSelectEl = document.getElementById('circleSelect');
+
+    const successModal = document.getElementById('success-modal');
+    const closeModalBtn = document.getElementById('close-modal');
+
+    // (Unified dark theme active statically)
+
+    // --- POPULATE DISTRICTS ---
+    function populateDistricts() {
+      // Clear except placeholder
+      districtSelect.innerHTML = '<option value="" disabled selected hidden>Select District</option>';
+      Object.keys(ADMIN_DATA).sort().forEach(district => {
+        const option = document.createElement('option');
+        option.value = district;
+        option.textContent = district;
+        districtSelect.appendChild(option);
+      });
+    }
+
+    // --- FETCH HIERARCHY FROM DATABASE API ---
+    async function loadHierarchyData() {
+      try {
+        const response = await fetch('/api/hierarchy');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.hierarchy && Object.keys(data.hierarchy).length > 0) {
+            ADMIN_DATA = data.hierarchy;
+          }
+        }
+      } catch (err) {
+        console.warn('Could not load hierarchy from server, using default:', err);
+      } finally {
+        populateDistricts();
+      }
+    }
+    loadHierarchyData();
+
+    // --- MOBILE VALIDATION PATTERN ---
+    function validateMobile(value) {
+      // Exactly 10 digits
+      const mobileRegex = /^[0-9]{10}$/;
+      return mobileRegex.test(value);
+    }
+
+    // Realtime field error handler helper
+    function showInputFeedback(inputEl, isValid, errorEl, errorMessage = "") {
+      const parentContainer = inputEl.closest('.relative');
+      const validIcon = parentContainer.querySelector('.fa-circle-check');
+      const invalidIcon = parentContainer.querySelector('.fa-circle-exclamation');
+      const icon = parentContainer.querySelector('.left-0 i');
+
+      if (isValid) {
+        inputEl.classList.remove('border-rose-500', 'focus:ring-rose-500', 'focus:border-rose-500');
+        inputEl.classList.add('border-emerald-500', 'focus:ring-emerald-500', 'focus:border-emerald-500');
+        if (validIcon) validIcon.classList.remove('hidden');
+        if (invalidIcon) invalidIcon.classList.add('hidden');
+        if (icon) icon.className = icon.className.replace('text-slate-400', 'text-emerald-500').replace('text-rose-500', 'text-emerald-500');
+        if (errorEl) {
+          errorEl.classList.add('hidden');
+          errorEl.textContent = '';
+        }
+      } else {
+        inputEl.classList.remove('border-slate-700', 'border-emerald-500', 'focus:ring-indigo-500', 'focus:border-indigo-500');
+        inputEl.classList.add('border-rose-500', 'focus:ring-rose-500', 'focus:border-rose-500');
+        if (validIcon) validIcon.classList.add('hidden');
+        if (invalidIcon) invalidIcon.classList.remove('hidden');
+        if (icon) icon.className = icon.className.replace('text-slate-400', 'text-rose-500').replace('text-emerald-500', 'text-rose-500');
+        if (errorEl) {
+          errorEl.classList.remove('hidden');
+          errorEl.textContent = errorMessage;
+        }
+      }
+    }
+
+    function clearInputFeedback(inputEl, errorEl) {
+      const parentContainer = inputEl.closest('.relative');
+      const validIcon = parentContainer.querySelector('.fa-circle-check');
+      const invalidIcon = parentContainer.querySelector('.fa-circle-exclamation');
+      const icon = parentContainer.querySelector('.left-0 i');
+      
+      inputEl.classList.remove('border-rose-500', 'border-emerald-500', 'focus:ring-rose-500', 'focus:border-rose-500', 'focus:ring-emerald-500', 'focus:border-emerald-500');
+      inputEl.classList.add('border-slate-700');
+      if (validIcon) validIcon.classList.add('hidden');
+      if (invalidIcon) invalidIcon.classList.add('hidden');
+      if (icon) icon.className = icon.className.replace('text-rose-500', 'text-slate-400').replace('text-emerald-500', 'text-slate-400');
+      if (errorEl) {
+        errorEl.classList.add('hidden');
+        errorEl.textContent = '';
+      }
+    }
+
+    // --- EVENT LISTENERS FOR REAL-TIME VALIDATION ---
+    fullNameInput.addEventListener('input', () => {
+      if (fullNameInput.value.trim() !== '') {
+        showInputFeedback(fullNameInput, true, document.getElementById('name-error'));
+      } else {
+        showInputFeedback(fullNameInput, false, document.getElementById('name-error'), 'Full name is required.');
+      }
+    });
+
+    mobileInput.addEventListener('input', (e) => {
+      // Restrict typing non-numeric characters
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+      
+      if (mobileInput.value.length === 10 && validateMobile(mobileInput.value)) {
+        showInputFeedback(mobileInput, true, document.getElementById('phone-error'));
+      } else if (mobileInput.value.length === 0) {
+        showInputFeedback(mobileInput, false, document.getElementById('phone-error'), 'Mobile number is required.');
+      } else {
+        showInputFeedback(mobileInput, false, document.getElementById('phone-error'), 'Please enter a valid 10-digit mobile number.');
+      }
+    });
+
+    // --- DYNAMIC HIERARCHY LOGIC BASED ON LEVEL SELECTION ---
+    levelSelect.addEventListener('change', () => {
+      const level = levelSelect.value;
+      
+      // Clear dynamic inputs validation or values when level changes
+      districtSelect.value = "";
+      zoneSelectEl.value = "";
+      zoneSelectEl.disabled = true;
+      zoneSelectEl.innerHTML = '<option value="" disabled selected hidden>Select Zone (Select District first)</option>';
+      circleSelectEl.value = "";
+      circleSelectEl.disabled = true;
+      circleSelectEl.innerHTML = '<option value="" disabled selected hidden>Select Circle (Select Zone first)</option>';
+      
+      // Clear any previous error indicators on them
+      document.getElementById('district-error').classList.add('hidden');
+      document.getElementById('zone-error').classList.add('hidden');
+      document.getElementById('circle-error').classList.add('hidden');
+
+      // Unhide and animate dropdown container
+      if (level) {
+        dynamicContainer.classList.remove('hidden');
+        // Tiny timeout to trigger transition
+        setTimeout(() => {
+          dynamicContainer.classList.add('opacity-100');
+        }, 10);
+      } else {
+        dynamicContainer.classList.add('hidden');
+        dynamicContainer.classList.remove('opacity-100');
+      }
+
+      // Configure individual group visibility and animate
+      if (level === 'District') {
+        showGroup(districtGroup);
+        hideGroup(zoneGroup);
+        hideGroup(circleGroup);
+      } else if (level === 'Zone') {
+        showGroup(districtGroup);
+        showGroup(zoneGroup);
+        hideGroup(circleGroup);
+      } else if (level === 'Circle') {
+        showGroup(districtGroup);
+        showGroup(zoneGroup);
+        showGroup(circleGroup);
+      }
+    });
+
+    function showGroup(groupEl) {
+      groupEl.classList.remove('hidden');
+      setTimeout(() => {
+        groupEl.classList.remove('opacity-0', 'translate-y-2');
+        groupEl.classList.add('opacity-100', 'translate-y-0');
+      }, 50);
+    }
+
+    function hideGroup(groupEl) {
+      groupEl.classList.add('opacity-0', 'translate-y-2');
+      groupEl.classList.remove('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        groupEl.classList.add('hidden');
+      }, 300);
+    }
+
+    // --- DISTRICT SELECT EVENT ---
+    districtSelect.addEventListener('change', () => {
+      document.getElementById('district-error').classList.add('hidden');
+      document.getElementById('district-error').textContent = 'Please select a district.';
+      const district = districtSelect.value;
+      const level = levelSelect.value;
+      
+      // Reset dependent Zone and Circle selections
+      zoneSelectEl.value = "";
+      zoneSelectEl.innerHTML = '<option value="" disabled selected hidden>Select Zone</option>';
+      circleSelectEl.value = "";
+      circleSelectEl.innerHTML = '<option value="" disabled selected hidden>Select Circle (Select Zone first)</option>';
+      circleSelectEl.disabled = true;
+
+      if (district && (level === 'Zone' || level === 'Circle')) {
+        const zones = ADMIN_DATA[district];
+        if (zones) {
+          Object.keys(zones).forEach(zone => {
+            const option = document.createElement('option');
+            option.value = zone;
+            option.textContent = zone;
+            zoneSelectEl.appendChild(option);
+          });
+          zoneSelectEl.disabled = false;
+        }
+      }
+    });
+
+    // --- ZONE SELECT EVENT ---
+    zoneSelectEl.addEventListener('change', () => {
+      document.getElementById('zone-error').classList.add('hidden');
+      document.getElementById('zone-error').textContent = 'Please select a zone.';
+      const district = districtSelect.value;
+      const zone = zoneSelectEl.value;
+      const level = levelSelect.value;
+
+      // Reset dependent Circle select
+      circleSelectEl.value = "";
+      circleSelectEl.innerHTML = '<option value="" disabled selected hidden>Select Circle</option>';
+
+      if (district && zone && level === 'Circle') {
+        const circles = ADMIN_DATA[district]?.[zone];
+        if (circles) {
+          circles.forEach(circle => {
+            const option = document.createElement('option');
+            option.value = circle;
+            option.textContent = circle;
+            circleSelectEl.appendChild(option);
+          });
+          circleSelectEl.disabled = false;
+        }
+      }
+    });
+
+    // --- CIRCLE SELECT EVENT ---
+    circleSelectEl.addEventListener('change', () => {
+      document.getElementById('circle-error').classList.add('hidden');
+      document.getElementById('circle-error').textContent = 'Please select a circle.';
+    });
+
+    // --- FORM SUBMISSION ---
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      let isFormValid = true;
+
+      // Validate Name
+      if (fullNameInput.value.trim() === '') {
+        showInputFeedback(fullNameInput, false, document.getElementById('name-error'), 'Full name is required.');
+        isFormValid = false;
+      } else {
+        showInputFeedback(fullNameInput, true, document.getElementById('name-error'));
+      }
+
+      // Validate Mobile
+      if (mobileInput.value.length === 0) {
+        showInputFeedback(mobileInput, false, document.getElementById('phone-error'), 'Mobile number is required.');
+        isFormValid = false;
+      } else if (!validateMobile(mobileInput.value)) {
+        showInputFeedback(mobileInput, false, document.getElementById('phone-error'), 'Please enter a valid 10-digit mobile number.');
+        isFormValid = false;
+      } else {
+        showInputFeedback(mobileInput, true, document.getElementById('phone-error'));
+      }
+
+      // Validate Level
+      if (levelSelect.value === '') {
+        document.getElementById('level-error').textContent = 'Please select administrative level.';
+        document.getElementById('level-error').classList.remove('hidden');
+        isFormValid = false;
+      } else {
+        document.getElementById('level-error').classList.add('hidden');
+      }
+
+      // Validate dynamic fields based on selection
+      const level = levelSelect.value;
+      if (level) {
+        // District validation
+        if (districtSelect.value === '') {
+          document.getElementById('district-error').classList.remove('hidden');
+          isFormValid = false;
+        } else {
+          document.getElementById('district-error').classList.add('hidden');
+        }
+
+        // Zone validation
+        if (level === 'Zone' || level === 'Circle') {
+          if (zoneSelectEl.value === '') {
+            document.getElementById('zone-error').classList.remove('hidden');
+            isFormValid = false;
+          } else {
+            document.getElementById('zone-error').classList.add('hidden');
+          }
+        }
+
+        // Circle validation
+        if (level === 'Circle') {
+          if (circleSelectEl.value === '') {
+            document.getElementById('circle-error').classList.remove('hidden');
+            isFormValid = false;
+          } else {
+            document.getElementById('circle-error').classList.add('hidden');
+          }
+        }
+      }
+
+      if (!isFormValid) {
+        // Find first invalid input and focus it
+        const firstInvalid = form.querySelector('.border-rose-500');
+        if (firstInvalid) firstInvalid.focus();
+        return;
+      }
+
+      // Prepare form payload with unique ID
+      const formData = {
+        id: 'p_' + Date.now(),
+        fullName: fullNameInput.value.trim(),
+        mobileNumber: mobileInput.value,
+        level: level,
+        hierarchy: {
+          district: districtSelect.value || null,
+          zone: (level === 'Zone' || level === 'Circle') ? zoneSelectEl.value : null,
+          circle: (level === 'Circle') ? circleSelectEl.value : null
+        }
+      };
+
+      try {
+        const response = await fetch('/api/promoters', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          // Log to console
+          console.log('%c[Samantha Graph Promoters Registration Payload]', 'color: #818cf8; font-weight: bold; font-size: 14px;', formData);
+          // Show customized success modal/dialog
+          openSuccessModal();
+        } else {
+          const errData = await response.json();
+          if (errData.error === 'mobileNumber') {
+            showInputFeedback(mobileInput, false, document.getElementById('phone-error'), errData.message);
+            mobileInput.focus();
+          } else if (errData.error === 'district') {
+            document.getElementById('district-error').textContent = errData.message;
+            document.getElementById('district-error').classList.remove('hidden');
+            districtSelect.focus();
+          } else if (errData.error === 'zone') {
+            document.getElementById('zone-error').textContent = errData.message;
+            document.getElementById('zone-error').classList.remove('hidden');
+            zoneSelectEl.focus();
+          } else if (errData.error === 'circle') {
+            document.getElementById('circle-error').textContent = errData.message;
+            document.getElementById('circle-error').classList.remove('hidden');
+            circleSelectEl.focus();
+          } else {
+            alert(errData.message || 'Error occurred while saving promoter.');
+          }
+        }
+      } catch (err) {
+        console.error('Error saving to MySQL backend:', err);
+        alert('Could not reach the server. Please ensure the backend is running.');
+      }
+    });
+
+    // --- SUCCESS DIALOG CONTROL ---
+    function openSuccessModal() {
+      successModal.classList.remove('hidden');
+      // Force repaint to allow transition
+      successModal.offsetHeight;
+      successModal.classList.remove('opacity-0');
+      successModal.querySelector('div').classList.remove('scale-95');
+      successModal.querySelector('div').classList.add('scale-100');
+    }
+
+    function closeSuccessModal() {
+      successModal.classList.add('opacity-0');
+      successModal.querySelector('div').classList.remove('scale-100');
+      successModal.querySelector('div').classList.add('scale-95');
+      setTimeout(() => {
+        successModal.classList.add('hidden');
+        // Reset form & styling feedback
+        form.reset();
+        clearInputFeedback(fullNameInput, document.getElementById('name-error'));
+        clearInputFeedback(mobileInput, document.getElementById('phone-error'));
+        document.getElementById('level-error').classList.add('hidden');
+        dynamicContainer.classList.add('hidden');
+        dynamicContainer.classList.remove('opacity-100');
+        districtGroup.classList.add('hidden', 'opacity-0', 'translate-y-2');
+        zoneGroup.classList.add('hidden', 'opacity-0', 'translate-y-2');
+        circleGroup.classList.add('hidden', 'opacity-0', 'translate-y-2');
+      }, 300);
+    }
+
+    closeModalBtn.addEventListener('click', closeSuccessModal);
+
+    // Close on overlay click
+    successModal.addEventListener('click', (e) => {
+      if (e.target === successModal) {
+        closeSuccessModal();
+      }
+    });
+
+    // (Copy utility removed)
+
+  </script>
+</body>
+</html>
