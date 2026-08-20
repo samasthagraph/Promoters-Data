@@ -353,6 +353,24 @@ app.delete('/api/promoters', async (req, res) => {
   }
 });
 
+// 6. ADMIN AUTHENTICATION LOGIN
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  const validUser = process.env.ADMIN_USERNAME || 'graphadmin';
+  const validPass = process.env.ADMIN_PASSWORD || 'graph951';
+
+  if (!username || !password) {
+    return res.status(400).json({ success: false, error: 'Username and password are required.' });
+  }
+
+  if (username === validUser && password === validPass) {
+    const token = Buffer.from(`${username}:${Date.now()}:samantha_graph_admin_session`).toString('base64');
+    return res.json({ success: true, token, message: 'Authentication successful.' });
+  }
+
+  return res.status(401).json({ success: false, error: 'Invalid username or password.' });
+});
+
 // Start Server after database initialization
 initializeDatabase().then(() => {
   app.listen(PORT, () => {
