@@ -1,7 +1,7 @@
 {
-  "name": "samantha-graph-promoters-backend",
+  "name": "samastha-graph-promoters-backend",
   "version": "1.0.0",
-  "description": "Samantha Graph Promoters Data Collection Form with MySQL Backend",
+  "description": "Samastha Graph Promoters Data Collection Form with MySQL Backend",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

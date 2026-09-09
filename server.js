@@ -364,7 +364,7 @@ app.post('/api/admin/login', (req, res) => {
   }
 
   if (username === validUser && password === validPass) {
-    const token = Buffer.from(`${username}:${Date.now()}:samantha_graph_admin_session`).toString('base64');
+    const token = Buffer.from(`${username}:${Date.now()}:samastha_graph_admin_session`).toString('base64');
     return res.json({ success: true, token, message: 'Authentication successful.' });
   }
 
