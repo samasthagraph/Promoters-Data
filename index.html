@@ -21,6 +21,14 @@
   <style>
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Prevent mobile browser zoom on focus while maintaining touch target size */
+    @media (max-width: 640px) {
+      input, select, textarea, button {
+        font-size: 16px !important;
+      }
     }
 
     /* Subtle background grid pattern for visual depth */
@@ -44,7 +52,7 @@
   </style>
 </head>
 
-<body class="h-full bg-slate-900 text-slate-100 flex flex-col justify-between overflow-x-hidden relative bg-grid">
+<body class="h-full min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between overflow-x-hidden relative bg-grid selection:bg-indigo-500 selection:text-white">
 
   <!-- Animated glow blobs in background -->
   <div
@@ -54,23 +62,25 @@
     class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none">
   </div>
 
-
-
   <!-- Main Content -->
-  <main class="flex-grow flex items-center justify-center px-4 py-8 z-10">
-    <div class="w-full max-w-xl">
+  <main class="flex-grow flex items-center justify-center px-3 sm:px-6 py-6 sm:py-10 z-10 w-full">
+    <div class="w-full max-w-xl mx-auto">
 
       <!-- Card Container -->
       <div
-        class="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-slate-950/50 relative overflow-hidden transition-all duration-300">
+        class="bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 shadow-2xl shadow-slate-950/60 relative overflow-hidden transition-all duration-300">
 
         <!-- Header info inside card -->
-        <div class="mb-8 text-center sm:text-left">
+        <div class="mb-6 sm:mb-8 text-center sm:text-left">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-3">
+            <i class="fa-solid fa-layer-group text-[10px]"></i>
+            <span>Samastha Graph Network</span>
+          </div>
           <h2
-            class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
             Promoters Data Form
           </h2>
-
+          <p class="text-xs sm:text-sm text-slate-400 mt-1.5">Register promoter details for Zone and Circle levels.</p>
         </div>
 
         <!-- Form Element -->

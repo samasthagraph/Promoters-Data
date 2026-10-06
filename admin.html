@@ -19,6 +19,13 @@
   <style>
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Prevent mobile zoom on focus */
+    @media (max-width: 640px) {
+      input, select, textarea, button {
+        font-size: 16px !important;
+      }
     }
     .bg-grid {
       background-size: 40px 40px;
@@ -40,57 +47,71 @@
     }
   </style>
 </head>
-<body class="h-full bg-slate-900 text-slate-100 flex flex-col justify-between overflow-x-hidden relative bg-grid">
+<body class="h-full min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between overflow-x-hidden relative bg-grid selection:bg-indigo-500 selection:text-white">
   
   <!-- Background Glow Accents -->
   <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none"></div>
   <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none"></div>
 
   <!-- Header -->
-  <header class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 flex justify-end items-center z-10">
-    <div class="flex items-center space-x-3">
+  <header class="w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex flex-col sm:flex-row justify-between items-center gap-3.5 z-10 border-b border-slate-800/40">
+    <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-start">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-0.5 shadow-lg shadow-indigo-500/20 flex items-center justify-center flex-shrink-0">
+          <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center text-indigo-400 font-extrabold text-sm sm:text-base">
+            SG
+          </div>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-xl font-extrabold text-white tracking-tight">Samastha Graph</h1>
+          <p class="text-[11px] sm:text-xs text-slate-400 font-medium">Promoter Management Console</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
       <!-- Back to Registration Form Button -->
-      <a href="index.html" class="px-4 py-2 text-xs font-semibold rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 border border-indigo-500/20 transition-all duration-200 cursor-pointer flex items-center space-x-2">
-        <i class="fa-solid fa-arrow-left"></i>
-        <span>Registration Form</span>
+      <a href="index.html" class="flex-1 sm:flex-none justify-center px-3.5 py-2 text-xs font-semibold rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 border border-indigo-500/20 transition-all duration-200 cursor-pointer flex items-center space-x-1.5">
+        <i class="fa-solid fa-arrow-left text-[11px]"></i>
+        <span>Form</span>
       </a>
       <!-- Logout Button -->
-      <button id="admin-logout-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 transition-all duration-200 cursor-pointer flex items-center space-x-2">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <button id="admin-logout-btn" class="flex-1 sm:flex-none justify-center px-3.5 py-2 text-xs font-semibold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 transition-all duration-200 cursor-pointer flex items-center space-x-1.5">
+        <i class="fa-solid fa-arrow-right-from-bracket text-[11px]"></i>
         <span>Logout</span>
       </button>
     </div>
   </header>
 
   <!-- Main Content Dashboard -->
-  <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 z-10 space-y-8">
+  <main class="flex-grow w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 z-10 space-y-6 sm:space-y-8">
     
     <!-- Actions Bar -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-800/30 p-4 rounded-2xl border border-slate-700/40">
-      <div class="flex items-center space-x-3">
-        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3.5 bg-slate-800/30 p-3 sm:p-4 rounded-2xl border border-slate-700/40">
+      <div class="flex items-center justify-between sm:justify-start space-x-3">
+        <h3 class="text-sm sm:text-base font-bold text-white flex items-center space-x-2">
           <span>Registered Promoters</span>
           <span id="filtered-count-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">0</span>
         </h3>
       </div>
-      <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+      <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
         <!-- WhatsApp Broadcast / Formatted Copy -->
-        <button id="copy-whatsapp-btn" class="flex-1 sm:flex-none px-4 py-2.5 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2">
+        <button id="copy-whatsapp-btn" class="col-span-2 sm:col-span-1 px-4 py-2.5 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2">
           <i class="fa-brands fa-whatsapp text-sm"></i>
           <span>Copy for WhatsApp</span>
         </button>
         <!-- Copy WhatsApp Numbers Only -->
-        <button id="copy-numbers-btn" class="flex-1 sm:flex-none px-4 py-2.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2">
+        <button id="copy-numbers-btn" class="px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-center space-x-1.5">
           <i class="fa-solid fa-copy text-xs text-slate-400"></i>
-          <span>Copy Numbers</span>
+          <span>Numbers</span>
         </button>
         <!-- Export CSV -->
-        <button id="export-csv" class="px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:text-white transition-all duration-200 cursor-pointer flex items-center space-x-2">
+        <button id="export-csv" class="px-3 py-2.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-center space-x-1.5">
           <i class="fa-solid fa-file-csv text-slate-400"></i>
-          <span>Export CSV</span>
+          <span>CSV</span>
         </button>
         <!-- Clear Data -->
-        <button id="clear-all" class="px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 hover:text-rose-300 transition-all duration-200 cursor-pointer flex items-center space-x-2">
+        <button id="clear-all" class="col-span-2 sm:col-span-1 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 hover:text-rose-300 transition-all duration-200 cursor-pointer flex items-center justify-center space-x-1.5">
           <i class="fa-solid fa-trash-can"></i>
           <span>Clear Data</span>
         </button>
@@ -98,38 +119,38 @@
     </div>
 
     <!-- Metrics Cards Grid (3-Tier View: Total, Zone, Circle) -->
-    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
       
       <!-- Card 1: Total Promoters -->
-      <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-5 shadow-lg flex items-center space-x-4">
-        <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl">
+      <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-4 sm:p-5 shadow-lg flex items-center space-x-4">
+        <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl flex-shrink-0">
           <i class="fa-solid fa-users text-xl"></i>
         </div>
         <div>
-          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Registered</p>
-          <h3 id="stat-total" class="text-2xl font-bold text-white mt-1">0</h3>
+          <p class="text-[11px] sm:text-xs font-medium text-slate-400 uppercase tracking-wider">Total Registered</p>
+          <h3 id="stat-total" class="text-xl sm:text-2xl font-bold text-white mt-0.5">0</h3>
         </div>
       </div>
 
       <!-- Card 2: Zone Level Count -->
-      <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-5 shadow-lg flex items-center space-x-4">
-        <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl">
+      <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-4 sm:p-5 shadow-lg flex items-center space-x-4">
+        <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl flex-shrink-0">
           <i class="fa-solid fa-layer-group text-xl"></i>
         </div>
         <div>
-          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Zone Level</p>
-          <h3 id="stat-zone" class="text-2xl font-bold text-white mt-1">0</h3>
+          <p class="text-[11px] sm:text-xs font-medium text-slate-400 uppercase tracking-wider">Zone Level</p>
+          <h3 id="stat-zone" class="text-xl sm:text-2xl font-bold text-white mt-0.5">0</h3>
         </div>
       </div>
 
       <!-- Card 3: Circle Level Count -->
-      <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-5 shadow-lg flex items-center space-x-4">
-        <div class="p-3 bg-pink-500/10 text-pink-400 rounded-xl">
+      <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-4 sm:p-5 shadow-lg flex items-center space-x-4">
+        <div class="p-3 bg-pink-500/10 text-pink-400 rounded-xl flex-shrink-0">
           <i class="fa-solid fa-circle-dot text-xl"></i>
         </div>
         <div>
-          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Circle Level</p>
-          <h3 id="stat-circle" class="text-2xl font-bold text-white mt-1">0</h3>
+          <p class="text-[11px] sm:text-xs font-medium text-slate-400 uppercase tracking-wider">Circle Level</p>
+          <h3 id="stat-circle" class="text-xl sm:text-2xl font-bold text-white mt-0.5">0</h3>
         </div>
       </div>
 
@@ -489,7 +510,7 @@
   </div>
 
   <!-- Floating Toast Notification -->
-  <div id="toast" class="fixed bottom-6 right-6 z-[120] transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center space-x-3.5 px-5 py-3.5 rounded-2xl bg-slate-900/95 border border-emerald-500/40 text-white shadow-2xl backdrop-blur-md">
+  <div id="toast" class="fixed bottom-4 inset-x-3 sm:inset-x-auto sm:right-6 sm:bottom-6 max-w-sm sm:max-w-md mx-auto sm:mx-0 z-[120] transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center space-x-3.5 px-4 sm:px-5 py-3 sm:py-3.5 rounded-2xl bg-slate-900/95 border border-emerald-500/40 text-white shadow-2xl backdrop-blur-md">
     <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0" id="toast-icon-wrap">
       <i class="fa-brands fa-whatsapp text-lg" id="toast-icon"></i>
     </div>
@@ -1120,44 +1141,44 @@
 
         // Mobile card builder
         const card = document.createElement('div');
-        card.className = 'bg-slate-800/30 border border-slate-700/40 rounded-2xl p-5 space-y-4 shadow';
+        card.className = 'bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-lg';
         card.setAttribute('data-id', p.id);
 
         card.innerHTML = `
-          <div class="flex justify-between items-start">
-            <div>
-              <h4 class="font-bold text-white text-base">${p.fullName}</h4>
-              <div class="flex items-center space-x-1.5 text-xs font-mono text-emerald-400 mt-0.5">
-                <i class="fa-brands fa-whatsapp"></i>
-                <span>${p.mobileNumber}</span>
-              </div>
+          <div class="flex justify-between items-start gap-2">
+            <div class="space-y-0.5">
+              <h4 class="font-bold text-white text-base leading-snug">${p.fullName}</h4>
+              <a href="https://wa.me/91${p.mobileNumber}?text=${prefilledMsg}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 text-xs font-mono text-emerald-400 hover:text-emerald-300 transition">
+                <i class="fa-brands fa-whatsapp text-sm"></i>
+                <span class="underline underline-offset-2">${p.mobileNumber}</span>
+              </a>
             </div>
-            ${levelBadge}
+            <div class="flex-shrink-0">${levelBadge}</div>
           </div>
           
-          <div class="bg-slate-900/40 border border-slate-800/80 rounded-xl p-3 text-xs space-y-1">
-            <span class="text-slate-500 block uppercase tracking-wider text-[9px] font-semibold">Hierarchy Mapping</span>
-            ${p.level === 'District' ? `<div class="text-slate-200 font-semibold">${p.hierarchy.district} (District)</div>` : ''}
-            ${p.level === 'Zone' ? `<div class="text-slate-200 font-semibold">${p.hierarchy.district} &rarr; ${p.hierarchy.zone}</div>` : ''}
-            ${p.level === 'Circle' ? `<div class="text-slate-200 font-semibold">${p.hierarchy.district} &rarr; ${p.hierarchy.zone} &rarr; ${p.hierarchy.circle}</div>` : ''}
+          <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-3 text-xs space-y-1">
+            <span class="text-slate-500 block uppercase tracking-wider text-[9px] font-bold">Hierarchy Mapping</span>
+            ${p.level === 'District' ? `<div class="text-slate-200 font-medium">${p.hierarchy.district} <span class="text-slate-500 text-[10px]">(District)</span></div>` : ''}
+            ${p.level === 'Zone' ? `<div class="text-slate-200 font-medium"><span class="text-slate-400">${p.hierarchy.district}</span> &rarr; <span class="text-indigo-400 font-semibold">${p.hierarchy.zone}</span></div>` : ''}
+            ${p.level === 'Circle' ? `<div class="text-slate-200 font-medium"><span class="text-slate-400">${p.hierarchy.district} &rarr; ${p.hierarchy.zone}</span> &rarr; <span class="text-emerald-400 font-semibold">${p.hierarchy.circle}</span></div>` : ''}
           </div>
 
-          <div class="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-slate-850">
-            <span class="text-[10px] text-slate-500">${regDate}</span>
-            <div class="flex items-center space-x-1.5">
-              <a href="https://wa.me/91${p.mobileNumber}?text=${prefilledMsg}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition flex items-center space-x-1 cursor-pointer">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 pt-2.5 border-t border-slate-700/40">
+            <span class="text-[11px] text-slate-400 font-mono">${regDate}</span>
+            <div class="grid grid-cols-4 gap-1.5 w-full sm:w-auto">
+              <a href="https://wa.me/91${p.mobileNumber}?text=${prefilledMsg}" target="_blank" rel="noopener noreferrer" class="py-2 px-2.5 text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-semibold rounded-xl border border-emerald-500/20 transition flex items-center justify-center space-x-1 cursor-pointer">
                 <i class="fa-brands fa-whatsapp text-xs"></i>
                 <span>Chat</span>
               </a>
-              <button onclick="copySingleWhatsApp('${p.id}')" class="px-2.5 py-1.5 text-xs bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-lg border border-indigo-500/20 transition flex items-center space-x-1 cursor-pointer">
-                <i class="fa-solid fa-copy text-[10px]"></i>
+              <button onclick="copySingleWhatsApp('${p.id}')" class="py-2 px-2.5 text-xs bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 font-semibold rounded-xl border border-indigo-500/20 transition flex items-center justify-center space-x-1 cursor-pointer">
+                <i class="fa-solid fa-copy text-[11px]"></i>
                 <span>Copy</span>
               </button>
-              <button onclick="openEditModal('${p.id}')" class="px-2.5 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 cursor-pointer">
-                <i class="fa-solid fa-pen-to-square text-[10px]"></i>
+              <button onclick="openEditModal('${p.id}')" title="Edit promoter" class="py-2 px-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition flex items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-pen-to-square text-xs"></i>
               </button>
-              <button onclick="confirmDelete('${p.id}')" class="px-2.5 py-1.5 text-xs bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg cursor-pointer">
-                <i class="fa-solid fa-trash-can text-[10px]"></i>
+              <button onclick="confirmDelete('${p.id}')" title="Delete promoter" class="py-2 px-2 text-xs bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-xl transition flex items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-trash-can text-xs"></i>
               </button>
             </div>
           </div>
