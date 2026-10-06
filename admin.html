@@ -66,13 +66,31 @@
   <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 z-10 space-y-8">
     
     <!-- Actions Bar -->
-    <div class="flex justify-end items-center">
-      <div class="flex space-x-3">
-        <button id="export-csv" class="px-4 py-2.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:text-white transition-all duration-200 cursor-pointer flex items-center space-x-2">
-          <i class="fa-solid fa-file-csv"></i>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-800/30 p-4 rounded-2xl border border-slate-700/40">
+      <div class="flex items-center space-x-3">
+        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+          <span>Registered Promoters</span>
+          <span id="filtered-count-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">0</span>
+        </h3>
+      </div>
+      <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+        <!-- WhatsApp Broadcast / Formatted Copy -->
+        <button id="copy-whatsapp-btn" class="flex-1 sm:flex-none px-4 py-2.5 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2">
+          <i class="fa-brands fa-whatsapp text-sm"></i>
+          <span>Copy for WhatsApp</span>
+        </button>
+        <!-- Copy WhatsApp Numbers Only -->
+        <button id="copy-numbers-btn" class="flex-1 sm:flex-none px-4 py-2.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-copy text-xs text-slate-400"></i>
+          <span>Copy Numbers</span>
+        </button>
+        <!-- Export CSV -->
+        <button id="export-csv" class="px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:text-white transition-all duration-200 cursor-pointer flex items-center space-x-2">
+          <i class="fa-solid fa-file-csv text-slate-400"></i>
           <span>Export CSV</span>
         </button>
-        <button id="clear-all" class="px-4 py-2.5 text-xs font-semibold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 hover:text-rose-300 transition-all duration-200 cursor-pointer flex items-center space-x-2">
+        <!-- Clear Data -->
+        <button id="clear-all" class="px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 hover:text-rose-300 transition-all duration-200 cursor-pointer flex items-center space-x-2">
           <i class="fa-solid fa-trash-can"></i>
           <span>Clear Data</span>
         </button>
@@ -118,53 +136,96 @@
     </section>
 
     <!-- Filters & Search Controls Card -->
-    <section class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-3xl p-6 shadow-xl space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+    <section class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-700/40">
+        <div class="flex items-center space-x-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+          <i class="fa-solid fa-sliders text-indigo-400"></i>
+          <span>Filter & Search Records</span>
+        </div>
+        <button id="reset-filters-btn" class="text-xs text-slate-400 hover:text-indigo-400 transition flex items-center space-x-1 cursor-pointer">
+          <i class="fa-solid fa-rotate-right text-[10px]"></i>
+          <span>Reset Filters</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5">
         
         <!-- Search Input -->
-        <div class="md:col-span-5 relative rounded-xl shadow-sm">
+        <div class="lg:col-span-4 relative rounded-xl shadow-sm">
           <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-            <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs"></i>
           </div>
           <input 
             type="text" 
             id="search-filter" 
-            placeholder="Search by name or mobile number..." 
-            class="block w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm"
+            placeholder="Search name or WhatsApp number..." 
+            class="block w-full pl-9 pr-4 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-xs sm:text-sm"
           >
         </div>
 
         <!-- Level Filter Dropdown -->
-        <div class="md:col-span-3 relative">
-          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-            <i class="fa-solid fa-filter text-slate-400"></i>
+        <div class="lg:col-span-2 relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-layer-group text-slate-400 text-xs"></i>
           </div>
           <select 
             id="level-filter"
-            class="block w-full pl-10 pr-10 py-3 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm appearance-none cursor-pointer"
+            class="block w-full pl-8 pr-8 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-xs sm:text-sm appearance-none cursor-pointer"
           >
             <option value="All">All Levels</option>
             <option value="Zone">Zone Level</option>
             <option value="Circle">Circle Level</option>
           </select>
-          <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
-            <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
           </div>
         </div>
 
         <!-- District Filter Dropdown -->
-        <div class="md:col-span-4 relative">
-          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-            <i class="fa-solid fa-location-dot text-slate-400"></i>
+        <div class="lg:col-span-2 relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-location-dot text-slate-400 text-xs"></i>
           </div>
           <select 
             id="district-filter"
-            class="block w-full pl-10 pr-10 py-3 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm appearance-none cursor-pointer"
+            class="block w-full pl-8 pr-8 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-xs sm:text-sm appearance-none cursor-pointer"
           >
             <option value="All">All Districts</option>
           </select>
-          <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
-            <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+          </div>
+        </div>
+
+        <!-- Zone Filter Dropdown -->
+        <div class="lg:col-span-2 relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-building text-slate-400 text-xs"></i>
+          </div>
+          <select 
+            id="zone-filter"
+            class="block w-full pl-8 pr-8 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-xs sm:text-sm appearance-none cursor-pointer"
+          >
+            <option value="All">All Zones</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+          </div>
+        </div>
+
+        <!-- Circle Filter Dropdown -->
+        <div class="lg:col-span-2 relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-circle-dot text-slate-400 text-xs"></i>
+          </div>
+          <select 
+            id="circle-filter"
+            class="block w-full pl-8 pr-8 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-xs sm:text-sm appearance-none cursor-pointer"
+          >
+            <option value="All">All Circles</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
           </div>
         </div>
 
@@ -427,6 +488,17 @@
     </div>
   </div>
 
+  <!-- Floating Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-[120] transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center space-x-3.5 px-5 py-3.5 rounded-2xl bg-slate-900/95 border border-emerald-500/40 text-white shadow-2xl backdrop-blur-md">
+    <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0" id="toast-icon-wrap">
+      <i class="fa-brands fa-whatsapp text-lg" id="toast-icon"></i>
+    </div>
+    <div>
+      <h5 class="text-xs font-bold text-white tracking-wide" id="toast-title">Copied!</h5>
+      <p class="text-[11px] text-slate-300" id="toast-message">Data copied to clipboard for WhatsApp.</p>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="w-full py-6 text-center text-xs text-slate-500 z-10 border-t border-slate-800/40">
     <p>&copy; 2026 Samastha Graph Network. All rights reserved.</p>
@@ -578,6 +650,14 @@
     const searchInput = document.getElementById('search-filter');
     const levelFilter = document.getElementById('level-filter');
     const districtFilter = document.getElementById('district-filter');
+    const zoneFilter = document.getElementById('zone-filter');
+    const circleFilter = document.getElementById('circle-filter');
+    const resetFiltersBtn = document.getElementById('reset-filters-btn');
+    const filteredCountBadge = document.getElementById('filtered-count-badge');
+
+    const copyWhatsAppBtn = document.getElementById('copy-whatsapp-btn');
+    const copyNumbersBtn = document.getElementById('copy-numbers-btn');
+    const exportBtn = document.getElementById('export-csv');
 
     const tbody = document.getElementById('promoters-tbody');
     const mobileContainer = document.getElementById('promoters-mobile-container');
@@ -587,6 +667,13 @@
     const statDistrict = document.getElementById('stat-district');
     const statZone = document.getElementById('stat-zone');
     const statCircle = document.getElementById('stat-circle');
+
+    // Toast Notification Elements
+    const toast = document.getElementById('toast');
+    const toastTitle = document.getElementById('toast-title');
+    const toastMessage = document.getElementById('toast-message');
+    const toastIcon = document.getElementById('toast-icon');
+    let toastTimeout = null;
 
     // Modals
     const clearConfirmModal = document.getElementById('clear-confirm-modal');
@@ -606,13 +693,62 @@
     const editZoneSelect = document.getElementById('edit-zone');
     const editCircleSelect = document.getElementById('edit-circle');
 
-    const exportBtn = document.getElementById('export-csv');
-
     // State Variables
     let promotersList = [];
-    let activeFilters = { search: '', level: 'All', district: 'All' };
+    let activeFilters = { search: '', level: 'All', district: 'All', zone: 'All', circle: 'All' };
 
-    // (Unified dark theme active statically)
+    // --- TOAST NOTIFICATION HELPER ---
+    function showToast(title, message, iconClass = 'fa-brands fa-whatsapp') {
+      if (!toast) return;
+      if (toastTimeout) clearTimeout(toastTimeout);
+
+      toastTitle.textContent = title;
+      toastMessage.textContent = message;
+      toastIcon.className = `${iconClass} text-lg`;
+
+      toast.classList.remove('opacity-0', 'translate-y-24', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-24', 'pointer-events-none');
+      }, 3500);
+    }
+
+    // --- CLIPBOARD HELPER ---
+    async function copyToClipboard(text, title, message) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          showToast(title, message);
+          return true;
+        }
+      } catch (err) {
+        console.warn('Navigator clipboard failed, using fallback copy:', err);
+      }
+
+      // Fallback using textarea execCommand
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        if (successful) {
+          showToast(title, message);
+          return true;
+        }
+      } catch (err) {
+        console.error('Fallback copy error:', err);
+      }
+      alert('Could not copy to clipboard automatically. Please copy manually.');
+      return false;
+    }
 
     // --- RETRIEVE & PROCESS DATA ---
     async function loadData() {
@@ -630,6 +766,8 @@
         promotersList = [];
       }
       populateDistrictFilterDropdown();
+      populateZoneFilterDropdown();
+      populateCircleFilterDropdown();
       calculateStats();
       renderDashboard();
     }
@@ -664,10 +802,9 @@
       window.requestAnimationFrame(step);
     }
 
-    // Populate the Filter Dropdown with districts available in database
+    // --- DYNAMIC FILTER DROPDOWNS ---
     function populateDistrictFilterDropdown() {
       const activeDistrictFilter = districtFilter.value;
-      // Get unique districts from both database promoters and hierarchy_locations
       const dbDistricts = promotersList.map(p => p.hierarchy.district).filter(Boolean);
       const hierarchyDistricts = Object.keys(ADMIN_DATA);
       const uniqueDistricts = [...new Set([...dbDistricts, ...hierarchyDistricts])].sort();
@@ -680,7 +817,6 @@
         districtFilter.appendChild(option);
       });
 
-      // Restore value if existed and still present
       if (uniqueDistricts.includes(activeDistrictFilter)) {
         districtFilter.value = activeDistrictFilter;
       } else {
@@ -689,11 +825,99 @@
       }
     }
 
-    // --- RENDER FUNCTION ---
-    function renderDashboard() {
-      // Filter list
-      const filtered = promotersList.filter(p => {
-        // Search Filter
+    function populateZoneFilterDropdown() {
+      const selectedDistrict = activeFilters.district;
+      const activeZoneFilter = zoneFilter.value;
+      let availableZones = [];
+
+      if (selectedDistrict !== 'All' && ADMIN_DATA[selectedDistrict]) {
+        availableZones = Object.keys(ADMIN_DATA[selectedDistrict]).sort();
+      } else {
+        // Collect all zones across all districts
+        const allZonesSet = new Set();
+        Object.keys(ADMIN_DATA).forEach(d => {
+          Object.keys(ADMIN_DATA[d] || {}).forEach(z => allZonesSet.add(z));
+        });
+        promotersList.forEach(p => {
+          if (p.hierarchy.zone) allZonesSet.add(p.hierarchy.zone);
+        });
+        availableZones = [...allZonesSet].sort();
+      }
+
+      zoneFilter.innerHTML = '<option value="All">All Zones</option>';
+      availableZones.forEach(z => {
+        const option = document.createElement('option');
+        option.value = z;
+        option.textContent = z;
+        zoneFilter.appendChild(option);
+      });
+
+      if (availableZones.includes(activeZoneFilter)) {
+        zoneFilter.value = activeZoneFilter;
+      } else {
+        zoneFilter.value = 'All';
+        activeFilters.zone = 'All';
+      }
+    }
+
+    function populateCircleFilterDropdown() {
+      const selectedDistrict = activeFilters.district;
+      const selectedZone = activeFilters.zone;
+      const activeCircleFilter = circleFilter.value;
+      let availableCircles = [];
+
+      if (selectedDistrict !== 'All' && selectedZone !== 'All' && ADMIN_DATA[selectedDistrict]?.[selectedZone]) {
+        availableCircles = [...ADMIN_DATA[selectedDistrict][selectedZone]].sort();
+      } else if (selectedZone !== 'All') {
+        // Collect circles for this zone across districts
+        const circlesSet = new Set();
+        Object.keys(ADMIN_DATA).forEach(d => {
+          if (ADMIN_DATA[d]?.[selectedZone]) {
+            ADMIN_DATA[d][selectedZone].forEach(c => circlesSet.add(c));
+          }
+        });
+        availableCircles = [...circlesSet].sort();
+      } else if (selectedDistrict !== 'All' && ADMIN_DATA[selectedDistrict]) {
+        // Collect all circles in this district
+        const circlesSet = new Set();
+        Object.keys(ADMIN_DATA[selectedDistrict]).forEach(z => {
+          ADMIN_DATA[selectedDistrict][z].forEach(c => circlesSet.add(c));
+        });
+        availableCircles = [...circlesSet].sort();
+      } else {
+        // Collect all circles everywhere
+        const circlesSet = new Set();
+        Object.keys(ADMIN_DATA).forEach(d => {
+          Object.keys(ADMIN_DATA[d] || {}).forEach(z => {
+            (ADMIN_DATA[d][z] || []).forEach(c => circlesSet.add(c));
+          });
+        });
+        promotersList.forEach(p => {
+          if (p.hierarchy.circle) circlesSet.add(p.hierarchy.circle);
+        });
+        availableCircles = [...circlesSet].sort();
+      }
+
+      circleFilter.innerHTML = '<option value="All">All Circles</option>';
+      availableCircles.forEach(c => {
+        const option = document.createElement('option');
+        option.value = c;
+        option.textContent = c;
+        circleFilter.appendChild(option);
+      });
+
+      if (availableCircles.includes(activeCircleFilter)) {
+        circleFilter.value = activeCircleFilter;
+      } else {
+        circleFilter.value = 'All';
+        activeFilters.circle = 'All';
+      }
+    }
+
+    // --- GET FILTERED PROMOTERS LIST ---
+    function getFilteredPromoters() {
+      return promotersList.filter(p => {
+        // Search Filter (Name or WhatsApp Number)
         const searchMatches = activeFilters.search === '' || 
           p.fullName.toLowerCase().includes(activeFilters.search.toLowerCase()) ||
           p.mobileNumber.includes(activeFilters.search);
@@ -704,8 +928,111 @@
         // District Filter
         const districtMatches = activeFilters.district === 'All' || p.hierarchy.district === activeFilters.district;
 
-        return searchMatches && levelMatches && districtMatches;
+        // Zone Filter
+        const zoneMatches = activeFilters.zone === 'All' || p.hierarchy.zone === activeFilters.zone;
+
+        // Circle Filter
+        const circleMatches = activeFilters.circle === 'All' || p.hierarchy.circle === activeFilters.circle;
+
+        return searchMatches && levelMatches && districtMatches && zoneMatches && circleMatches;
       });
+    }
+
+    // --- WHATSAPP MESSAGE FORMATTERS ---
+    function getFilterSummaryText() {
+      const parts = [];
+      if (activeFilters.district !== 'All') parts.push(`District: ${activeFilters.district}`);
+      if (activeFilters.zone !== 'All') parts.push(`Zone: ${activeFilters.zone}`);
+      if (activeFilters.circle !== 'All') parts.push(`Circle: ${activeFilters.circle}`);
+      if (activeFilters.level !== 'All') parts.push(`Level: ${activeFilters.level}`);
+      if (activeFilters.search !== '') parts.push(`Search: "${activeFilters.search}"`);
+      return parts.length > 0 ? parts.join(' | ') : 'All Promoters';
+    }
+
+    function formatSinglePromoterWhatsAppText(p) {
+      let text = `*SAMASTHA GRAPH PROMOTER DETAILS*\n`;
+      text += `━━━━━━━━━━━━━━━━━━━━\n`;
+      text += `👤 *Name:* ${p.fullName}\n`;
+      text += `📱 *WhatsApp:* +91 ${p.mobileNumber}\n`;
+      text += `🏷️ *Level:* ${p.level}\n`;
+      text += `📍 *District:* ${p.hierarchy.district || 'N/A'}\n`;
+      if (p.hierarchy.zone) text += `🏛️ *Zone:* ${p.hierarchy.zone}\n`;
+      if (p.hierarchy.circle) text += `⭕ *Circle:* ${p.hierarchy.circle}\n`;
+      const regDate = new Date(p.timestamp).toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      text += `📅 *Registered:* ${regDate}\n`;
+      text += `━━━━━━━━━━━━━━━━━━━━\n`;
+      text += `_Samastha Graph Network_`;
+      return text;
+    }
+
+    function formatPromotersListWhatsAppText(list) {
+      const filterSummary = getFilterSummaryText();
+      const timestampStr = new Date().toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+
+      let msg = `📢 *SAMASTHA GRAPH PROMOTERS LIST*\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `📊 *Filter:* ${filterSummary}\n`;
+      msg += `👥 *Total Count:* ${list.length} Promoters\n`;
+      msg += `📅 *Generated:* ${timestampStr}\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+      list.forEach((p, index) => {
+        msg += `${index + 1}. *${p.fullName}*\n`;
+        msg += `   📱 WhatsApp: +91 ${p.mobileNumber}\n`;
+        msg += `   🏷️ Level: ${p.level}\n`;
+        msg += `   📍 District: ${p.hierarchy.district || '-'}\n`;
+        if (p.hierarchy.zone) msg += `   🏛️ Zone: ${p.hierarchy.zone}\n`;
+        if (p.hierarchy.circle) msg += `   ⭕ Circle: ${p.hierarchy.circle}\n`;
+        msg += `\n`;
+      });
+
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `_Samastha Graph Network_`;
+      return msg;
+    }
+
+    // Copy single promoter WhatsApp text
+    window.copySingleWhatsApp = function(id) {
+      const p = promotersList.find(item => item.id === id);
+      if (!p) return;
+      const text = formatSinglePromoterWhatsAppText(p);
+      copyToClipboard(text, 'Copied for WhatsApp!', `Details for ${p.fullName} copied to clipboard.`);
+    };
+
+    // Copy formatted list of filtered promoters
+    function copyWhatsAppFormatted() {
+      const filtered = getFilteredPromoters();
+      if (filtered.length === 0) {
+        showToast('No Promoters', 'No promoters match current filters to copy.', 'fa-solid fa-circle-exclamation');
+        return;
+      }
+      const text = formatPromotersListWhatsAppText(filtered);
+      copyToClipboard(text, 'Copied for WhatsApp!', `${filtered.length} promoter record(s) formatted and copied.`);
+    }
+
+    // Copy list of WhatsApp numbers only
+    function copyWhatsAppNumbers() {
+      const filtered = getFilteredPromoters();
+      if (filtered.length === 0) {
+        showToast('No Promoters', 'No promoters match current filters to copy.', 'fa-solid fa-circle-exclamation');
+        return;
+      }
+      const numbers = filtered.map(p => p.mobileNumber).join(', ');
+      copyToClipboard(numbers, 'WhatsApp Numbers Copied!', `${filtered.length} WhatsApp numbers copied.`);
+    }
+
+    // --- RENDER FUNCTION ---
+    function renderDashboard() {
+      const filtered = getFilteredPromoters();
+
+      // Update badge
+      if (filteredCountBadge) {
+        filteredCountBadge.textContent = `${filtered.length} / ${promotersList.length}`;
+      }
 
       // Sort by registered timestamp descending
       filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -761,18 +1088,31 @@
           levelBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-pink-500/10 text-pink-400 border border-pink-500/20">Circle</span>';
         }
 
+        const prefilledMsg = encodeURIComponent(`Assalamu Alaikum ${p.fullName}, regarding Samastha Graph Network.`);
+
         tr.innerHTML = `
           <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">${p.fullName}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-300 font-mono">${p.mobileNumber}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-mono">
+            <div class="flex items-center space-x-2 text-slate-200">
+              <i class="fa-brands fa-whatsapp text-emerald-400 text-xs"></i>
+              <span>${p.mobileNumber}</span>
+            </div>
+          </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm">${levelBadge}</td>
           <td class="px-6 py-4 text-sm">${hierarchyHTML}</td>
           <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-400">${regDate}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-            <button onclick="openEditModal('${p.id}')" class="px-2.5 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition cursor-pointer">
-              <i class="fa-solid fa-pen-to-square"></i>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1.5">
+            <a href="https://wa.me/91${p.mobileNumber}?text=${prefilledMsg}" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp" class="p-2 text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 rounded-lg border border-emerald-500/20 transition inline-flex items-center justify-center cursor-pointer">
+              <i class="fa-brands fa-whatsapp text-sm"></i>
+            </a>
+            <button onclick="copySingleWhatsApp('${p.id}')" title="Copy for WhatsApp" class="p-2 text-xs bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 rounded-lg border border-indigo-500/20 transition inline-flex items-center justify-center cursor-pointer">
+              <i class="fa-solid fa-copy text-xs"></i>
             </button>
-            <button onclick="confirmDelete('${p.id}')" class="px-2.5 py-1.5 text-xs bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 rounded-lg transition cursor-pointer">
-              <i class="fa-solid fa-trash-can"></i>
+            <button onclick="openEditModal('${p.id}')" title="Edit details" class="p-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition inline-flex items-center justify-center cursor-pointer">
+              <i class="fa-solid fa-pen-to-square text-xs"></i>
+            </button>
+            <button onclick="confirmDelete('${p.id}')" title="Delete record" class="p-2 text-xs bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 rounded-lg transition inline-flex items-center justify-center cursor-pointer">
+              <i class="fa-solid fa-trash-can text-xs"></i>
             </button>
           </td>
         `;
@@ -787,7 +1127,10 @@
           <div class="flex justify-between items-start">
             <div>
               <h4 class="font-bold text-white text-base">${p.fullName}</h4>
-              <span class="text-xs font-mono text-slate-400">${p.mobileNumber}</span>
+              <div class="flex items-center space-x-1.5 text-xs font-mono text-emerald-400 mt-0.5">
+                <i class="fa-brands fa-whatsapp"></i>
+                <span>${p.mobileNumber}</span>
+              </div>
             </div>
             ${levelBadge}
           </div>
@@ -799,14 +1142,22 @@
             ${p.level === 'Circle' ? `<div class="text-slate-200 font-semibold">${p.hierarchy.district} &rarr; ${p.hierarchy.zone} &rarr; ${p.hierarchy.circle}</div>` : ''}
           </div>
 
-          <div class="flex justify-between items-center pt-2 border-t border-slate-850">
+          <div class="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-slate-850">
             <span class="text-[10px] text-slate-500">${regDate}</span>
-            <div class="space-x-1">
-              <button onclick="openEditModal('${p.id}')" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 cursor-pointer">
-                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+            <div class="flex items-center space-x-1.5">
+              <a href="https://wa.me/91${p.mobileNumber}?text=${prefilledMsg}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition flex items-center space-x-1 cursor-pointer">
+                <i class="fa-brands fa-whatsapp text-xs"></i>
+                <span>Chat</span>
+              </a>
+              <button onclick="copySingleWhatsApp('${p.id}')" class="px-2.5 py-1.5 text-xs bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-lg border border-indigo-500/20 transition flex items-center space-x-1 cursor-pointer">
+                <i class="fa-solid fa-copy text-[10px]"></i>
+                <span>Copy</span>
               </button>
-              <button onclick="confirmDelete('${p.id}')" class="px-3 py-1.5 text-xs bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg cursor-pointer">
-                <i class="fa-solid fa-trash-can mr-1"></i> Delete
+              <button onclick="openEditModal('${p.id}')" class="px-2.5 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 cursor-pointer">
+                <i class="fa-solid fa-pen-to-square text-[10px]"></i>
+              </button>
+              <button onclick="confirmDelete('${p.id}')" class="px-2.5 py-1.5 text-xs bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg cursor-pointer">
+                <i class="fa-solid fa-trash-can text-[10px]"></i>
               </button>
             </div>
           </div>
@@ -828,8 +1179,48 @@
 
     districtFilter.addEventListener('change', (e) => {
       activeFilters.district = e.target.value;
+      activeFilters.zone = 'All';
+      activeFilters.circle = 'All';
+      populateZoneFilterDropdown();
+      populateCircleFilterDropdown();
       renderDashboard();
     });
+
+    zoneFilter.addEventListener('change', (e) => {
+      activeFilters.zone = e.target.value;
+      activeFilters.circle = 'All';
+      populateCircleFilterDropdown();
+      renderDashboard();
+    });
+
+    circleFilter.addEventListener('change', (e) => {
+      activeFilters.circle = e.target.value;
+      renderDashboard();
+    });
+
+    // Reset Filters Button
+    if (resetFiltersBtn) {
+      resetFiltersBtn.addEventListener('click', () => {
+        activeFilters = { search: '', level: 'All', district: 'All', zone: 'All', circle: 'All' };
+        searchInput.value = '';
+        levelFilter.value = 'All';
+        districtFilter.value = 'All';
+        populateZoneFilterDropdown();
+        populateCircleFilterDropdown();
+        zoneFilter.value = 'All';
+        circleFilter.value = 'All';
+        renderDashboard();
+        showToast('Filters Reset', 'All filter options have been cleared.', 'fa-solid fa-rotate-right');
+      });
+    }
+
+    // Copy WhatsApp Buttons
+    if (copyWhatsAppBtn) {
+      copyWhatsAppBtn.addEventListener('click', copyWhatsAppFormatted);
+    }
+    if (copyNumbersBtn) {
+      copyNumbersBtn.addEventListener('click', copyWhatsAppNumbers);
+    }
 
     // --- DELETE PROMOTER ---
     window.confirmDelete = async function(id) {
