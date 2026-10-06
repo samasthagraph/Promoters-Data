@@ -208,7 +208,7 @@ app.post('/api/promoters', async (req, res) => {
   const { id, fullName, mobileNumber, level, hierarchy } = req.body;
 
   if (!fullName || !mobileNumber || !level) {
-    return res.status(400).json({ error: 'fields', message: 'Name, mobile number, and level are required.' });
+    return res.status(400).json({ error: 'fields', message: 'Name, WhatsApp number, and level are required.' });
   }
 
   const finalId = id || 'p_' + Date.now();
@@ -217,10 +217,10 @@ app.post('/api/promoters', async (req, res) => {
   const circle = (level === 'Circle') ? (hierarchy?.circle || null) : null;
 
   try {
-    // A. Unique mobile number check
+    // A. Unique mobile/whatsapp number check
     const [mobileRows] = await pool.query('SELECT id FROM promoters WHERE mobileNumber = ?', [mobileNumber]);
     if (mobileRows.length > 0) {
-      return res.status(400).json({ error: 'mobileNumber', message: 'This mobile number is already registered.' });
+      return res.status(400).json({ error: 'mobileNumber', message: 'This WhatsApp number is already registered.' });
     }
 
     // B. Uniqueness validation based on level hierarchy
@@ -269,7 +269,7 @@ app.put('/api/promoters/:id', async (req, res) => {
   const { fullName, mobileNumber, level, hierarchy } = req.body;
 
   if (!fullName || !mobileNumber || !level) {
-    return res.status(400).json({ error: 'fields', message: 'Name, mobile number, and level are required.' });
+    return res.status(400).json({ error: 'fields', message: 'Name, WhatsApp number, and level are required.' });
   }
 
   const district = hierarchy?.district || null;
@@ -277,10 +277,10 @@ app.put('/api/promoters/:id', async (req, res) => {
   const circle = (level === 'Circle') ? (hierarchy?.circle || null) : null;
 
   try {
-    // A. Unique mobile number check (excluding current promoter)
+    // A. Unique mobile/whatsapp number check (excluding current promoter)
     const [mobileRows] = await pool.query('SELECT id FROM promoters WHERE mobileNumber = ? AND id != ?', [mobileNumber, id]);
     if (mobileRows.length > 0) {
-      return res.status(400).json({ error: 'mobileNumber', message: 'This mobile number is already registered to another promoter.' });
+      return res.status(400).json({ error: 'mobileNumber', message: 'This WhatsApp number is already registered to another promoter.' });
     }
 
     // B. Uniqueness validation based on level hierarchy (excluding current promoter)

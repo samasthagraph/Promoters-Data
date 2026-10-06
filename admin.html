@@ -192,7 +192,7 @@
           <thead class="bg-slate-900/40">
             <tr>
               <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Promoter Name</th>
-              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Mobile Number</th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">WhatsApp Number</th>
               <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Admin Level</th>
               <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Hierarchy Details</th>
               <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Reg. Date</th>
@@ -284,9 +284,9 @@
           >
         </div>
 
-        <!-- Phone -->
+        <!-- WhatsApp Number -->
         <div class="space-y-1.5">
-          <label for="edit-mobileNumber" class="block text-xs font-semibold text-slate-300">Mobile Number</label>
+          <label for="edit-mobileNumber" class="block text-xs font-semibold text-slate-300">WhatsApp Number</label>
           <input 
             type="tel" 
             id="edit-mobileNumber" 
@@ -918,7 +918,7 @@
       }
       
       let csvContent = "data:text/csv;charset=utf-8,";
-      csvContent += "ID,Full Name,Mobile Number,Admin Level,District,Zone,Circle,Registration Date\n";
+      csvContent += "ID,Full Name,WhatsApp Number,Admin Level,District,Zone,Circle,Registration Date\n";
       
       promotersList.forEach(p => {
         const row = [
@@ -1082,7 +1082,7 @@
 
       // Basic validations
       if (name === '' || phone.length !== 10) {
-        alert('Please fill out all required fields with valid inputs (10-digit mobile number).');
+        alert('Please fill out all required fields with valid inputs (10-digit WhatsApp number).');
         return;
       }
 
