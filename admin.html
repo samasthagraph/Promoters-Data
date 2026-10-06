@@ -95,10 +95,15 @@
         </h3>
       </div>
       <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
-        <!-- WhatsApp Broadcast / Formatted Copy -->
-        <button id="copy-whatsapp-btn" class="col-span-2 sm:col-span-1 px-4 py-2.5 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2">
+        <!-- Copy District Total (Totals Method - No Individual Names) -->
+        <button id="copy-district-total-btn" class="col-span-2 sm:col-span-1 px-4 py-2.5 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2">
           <i class="fa-brands fa-whatsapp text-sm"></i>
-          <span>Copy for WhatsApp</span>
+          <span>Copy District Total (Totals Only)</span>
+        </button>
+        <!-- Copy Detailed Member List -->
+        <button id="copy-whatsapp-btn" class="px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-center space-x-1.5">
+          <i class="fa-solid fa-list text-xs text-indigo-400"></i>
+          <span>Member List</span>
         </button>
         <!-- Copy WhatsApp Numbers Only -->
         <button id="copy-numbers-btn" class="px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-center space-x-1.5">
@@ -250,6 +255,30 @@
           </div>
         </div>
 
+      </div>
+    </section>
+
+    <!-- District Level Totals Summary & Zone Breakdown Section -->
+    <section id="district-totals-section" class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl space-y-4">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-700/40">
+        <div>
+          <div class="flex items-center space-x-2">
+            <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+              <i class="fa-solid fa-chart-pie text-sm"></i>
+            </div>
+            <h3 class="text-sm sm:text-base font-bold text-white tracking-tight" id="district-summary-heading">District Totals Breakdown</h3>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">Aggregated statistics by Zone (Totals Method for official district updates)</p>
+        </div>
+        <button id="quick-copy-district-btn" class="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2">
+          <i class="fa-brands fa-whatsapp text-sm"></i>
+          <span>Copy District Total Message</span>
+        </button>
+      </div>
+
+      <!-- Zone Totals Grid -->
+      <div id="zone-breakdown-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- Dynamically populated zone breakdown cards -->
       </div>
     </section>
 
@@ -676,9 +705,15 @@
     const resetFiltersBtn = document.getElementById('reset-filters-btn');
     const filteredCountBadge = document.getElementById('filtered-count-badge');
 
+    const copyDistrictTotalBtn = document.getElementById('copy-district-total-btn');
+    const quickCopyDistrictBtn = document.getElementById('quick-copy-district-btn');
     const copyWhatsAppBtn = document.getElementById('copy-whatsapp-btn');
     const copyNumbersBtn = document.getElementById('copy-numbers-btn');
     const exportBtn = document.getElementById('export-csv');
+
+    const districtTotalsSection = document.getElementById('district-totals-section');
+    const districtSummaryHeading = document.getElementById('district-summary-heading');
+    const zoneBreakdownCards = document.getElementById('zone-breakdown-cards');
 
     const tbody = document.getElementById('promoters-tbody');
     const mobileContainer = document.getElementById('promoters-mobile-container');
@@ -970,6 +1005,56 @@
       return parts.length > 0 ? parts.join(' | ') : 'All Promoters';
     }
 
+    // Format District Level Total Summary (Totals Method - No Individual Names)
+    function formatDistrictTotalWhatsAppText(districtName, list) {
+      const timestampStr = new Date().toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+
+      const totalCount = list.length;
+      const zoneCount = list.filter(p => p.level === 'Zone').length;
+      const circleCount = list.filter(p => p.level === 'Circle').length;
+
+      // Group promoters by Zone
+      const zoneMap = {};
+      list.forEach(p => {
+        const zName = p.hierarchy.zone || 'General / Unassigned Zone';
+        if (!zoneMap[zName]) {
+          zoneMap[zName] = { total: 0, zoneLevel: 0, circleLevel: 0 };
+        }
+        zoneMap[zName].total++;
+        if (p.level === 'Zone') zoneMap[zName].zoneLevel++;
+        if (p.level === 'Circle') zoneMap[zName].circleLevel++;
+      });
+
+      const targetDistrict = districtName === 'All' ? 'ALL DISTRICTS (State Total)' : districtName;
+
+      let msg = `📢 *SAMASTHA GRAPH PROMOTERS UPDATE*\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `📍 *District:* ${targetDistrict}\n`;
+      msg += `👥 *Total Promoters:* ${totalCount}\n`;
+      msg += `🏷️ *Zone Level:* ${zoneCount}\n`;
+      msg += `⭕ *Circle Level:* ${circleCount}\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+      msg += `🏛️ *ZONE BREAKDOWN (TOTALS):*\n`;
+      const zoneNames = Object.keys(zoneMap).sort();
+      if (zoneNames.length === 0) {
+        msg += `_No registrations found under this selection._\n`;
+      } else {
+        zoneNames.forEach((zName, i) => {
+          const z = zoneMap[zName];
+          msg += `${i + 1}. *${zName}*: ${z.total} Promoters\n`;
+          msg += `   • Zone Level: ${z.zoneLevel} | Circle Level: ${z.circleLevel}\n`;
+        });
+      }
+
+      msg += `\n━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `📅 *Generated:* ${timestampStr}\n`;
+      msg += `_Samastha Graph Network_`;
+      return msg;
+    }
+
     function formatSinglePromoterWhatsAppText(p) {
       let text = `*SAMASTHA GRAPH PROMOTER DETAILS*\n`;
       text += `━━━━━━━━━━━━━━━━━━━━\n`;
@@ -1016,6 +1101,24 @@
       return msg;
     }
 
+    // Copy District Total Summary (Totals Method)
+    function copyDistrictTotalWhatsApp() {
+      // Use list matching current district filter
+      const targetDistrict = activeFilters.district;
+      const districtList = targetDistrict === 'All' 
+        ? promotersList 
+        : promotersList.filter(p => p.hierarchy.district === targetDistrict);
+
+      if (districtList.length === 0) {
+        showToast('No Promoters', 'No promoter data found for this district.', 'fa-solid fa-circle-exclamation');
+        return;
+      }
+
+      const text = formatDistrictTotalWhatsAppText(targetDistrict, districtList);
+      const districtLabel = targetDistrict === 'All' ? 'State' : targetDistrict;
+      copyToClipboard(text, `${districtLabel} Totals Copied!`, `Total counts summary (no names) copied for WhatsApp.`);
+    }
+
     // Copy single promoter WhatsApp text
     window.copySingleWhatsApp = function(id) {
       const p = promotersList.find(item => item.id === id);
@@ -1031,8 +1134,16 @@
         showToast('No Promoters', 'No promoters match current filters to copy.', 'fa-solid fa-circle-exclamation');
         return;
       }
-      const text = formatPromotersListWhatsAppText(filtered);
-      copyToClipboard(text, 'Copied for WhatsApp!', `${filtered.length} promoter record(s) formatted and copied.`);
+      
+      // If at district level (no zone chosen), use the Total Method by default
+      if (activeFilters.zone === 'All' && activeFilters.circle === 'All') {
+        const text = formatDistrictTotalWhatsAppText(activeFilters.district, filtered);
+        copyToClipboard(text, 'District Totals Copied!', `Summary totals formatted and copied for WhatsApp.`);
+      } else {
+        // Detailed list for Zone/Circle drill-down
+        const text = formatPromotersListWhatsAppText(filtered);
+        copyToClipboard(text, 'Member List Copied!', `${filtered.length} promoter record(s) formatted and copied.`);
+      }
     }
 
     // Copy list of WhatsApp numbers only
@@ -1046,9 +1157,82 @@
       copyToClipboard(numbers, 'WhatsApp Numbers Copied!', `${filtered.length} WhatsApp numbers copied.`);
     }
 
+    // --- RENDER DISTRICT TOTALS BREAKDOWN ---
+    function renderDistrictTotalsSummary() {
+      if (!zoneBreakdownCards) return;
+
+      const targetDistrict = activeFilters.district;
+      const districtList = targetDistrict === 'All' 
+        ? promotersList 
+        : promotersList.filter(p => p.hierarchy.district === targetDistrict);
+
+      if (districtSummaryHeading) {
+        districtSummaryHeading.textContent = targetDistrict === 'All'
+          ? `All Districts Breakdown (${districtList.length} Total Promoters)`
+          : `${targetDistrict} District Totals (${districtList.length} Total Promoters)`;
+      }
+
+      // Group by Zone
+      const zoneMap = {};
+      
+      // Prepopulate known zones for the selected district if available
+      if (targetDistrict !== 'All' && ADMIN_DATA[targetDistrict]) {
+        Object.keys(ADMIN_DATA[targetDistrict]).forEach(z => {
+          zoneMap[z] = { total: 0, zoneLevel: 0, circleLevel: 0 };
+        });
+      }
+
+      districtList.forEach(p => {
+        const zName = p.hierarchy.zone || 'Unassigned Zone';
+        if (!zoneMap[zName]) {
+          zoneMap[zName] = { total: 0, zoneLevel: 0, circleLevel: 0 };
+        }
+        zoneMap[zName].total++;
+        if (p.level === 'Zone') zoneMap[zName].zoneLevel++;
+        if (p.level === 'Circle') zoneMap[zName].circleLevel++;
+      });
+
+      const zoneEntries = Object.entries(zoneMap).sort((a, b) => b[1].total - a[1].total);
+      zoneBreakdownCards.innerHTML = '';
+
+      if (zoneEntries.length === 0) {
+        zoneBreakdownCards.innerHTML = `
+          <div class="col-span-full py-4 text-center text-xs text-slate-500">
+            No zone data registered yet in this district.
+          </div>
+        `;
+        return;
+      }
+
+      zoneEntries.forEach(([zName, stats]) => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 space-y-2 hover:border-slate-700 transition';
+        card.innerHTML = `
+          <div class="flex justify-between items-center">
+            <h4 class="font-bold text-white text-xs truncate" title="${zName}">${zName}</h4>
+            <span class="text-xs font-extrabold px-2 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">
+              ${stats.total}
+            </span>
+          </div>
+          <div class="flex items-center space-x-3 text-[11px] text-slate-400">
+            <div class="flex items-center space-x-1">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span>Zone: <strong class="text-slate-200 font-mono">${stats.zoneLevel}</strong></span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <span class="w-2 h-2 rounded-full bg-pink-400"></span>
+              <span>Circle: <strong class="text-slate-200 font-mono">${stats.circleLevel}</strong></span>
+            </div>
+          </div>
+        `;
+        zoneBreakdownCards.appendChild(card);
+      });
+    }
+
     // --- RENDER FUNCTION ---
     function renderDashboard() {
       const filtered = getFilteredPromoters();
+      renderDistrictTotalsSummary();
 
       // Update badge
       if (filteredCountBadge) {
@@ -1236,6 +1420,12 @@
     }
 
     // Copy WhatsApp Buttons
+    if (copyDistrictTotalBtn) {
+      copyDistrictTotalBtn.addEventListener('click', copyDistrictTotalWhatsApp);
+    }
+    if (quickCopyDistrictBtn) {
+      quickCopyDistrictBtn.addEventListener('click', copyDistrictTotalWhatsApp);
+    }
     if (copyWhatsAppBtn) {
       copyWhatsAppBtn.addEventListener('click', copyWhatsAppFormatted);
     }
