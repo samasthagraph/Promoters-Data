@@ -15,14 +15,14 @@ CREATE TABLE `hierarchy_locations` (
     `circle` VARCHAR(100) NOT NULL
 );
 
--- 2. Promoters Table
+-- 2. Promoters Table (Zone & Circle Levels)
 CREATE TABLE IF NOT EXISTS `promoters` (
     `id` VARCHAR(50) NOT NULL PRIMARY KEY,
     `fullName` VARCHAR(255) NOT NULL,
     `mobileNumber` VARCHAR(15) NOT NULL,
-    `level` ENUM('District', 'Zone', 'Circle') NOT NULL,
+    `level` ENUM('Zone', 'Circle') NOT NULL,
     `district` VARCHAR(100) NOT NULL,
-    `zone` VARCHAR(100) DEFAULT NULL,
+    `zone` VARCHAR(100) NOT NULL,
     `circle` VARCHAR(100) DEFAULT NULL,
     `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY `unique_mobile` (`mobileNumber`)

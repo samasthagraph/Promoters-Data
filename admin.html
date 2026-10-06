@@ -79,8 +79,8 @@
       </div>
     </div>
 
-    <!-- Metrics Cards Grid -->
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    <!-- Metrics Cards Grid (3-Tier View: Total, Zone, Circle) -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
       
       <!-- Card 1: Total Promoters -->
       <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-5 shadow-lg flex items-center space-x-4">
@@ -93,18 +93,7 @@
         </div>
       </div>
 
-      <!-- Card 2: District Level Count -->
-      <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-5 shadow-lg flex items-center space-x-4">
-        <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
-          <i class="fa-solid fa-location-dot text-xl"></i>
-        </div>
-        <div>
-          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">District Level</p>
-          <h3 id="stat-district" class="text-2xl font-bold text-white mt-1">0</h3>
-        </div>
-      </div>
-
-      <!-- Card 3: Zone Level Count -->
+      <!-- Card 2: Zone Level Count -->
       <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-5 shadow-lg flex items-center space-x-4">
         <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl">
           <i class="fa-solid fa-layer-group text-xl"></i>
@@ -115,7 +104,7 @@
         </div>
       </div>
 
-      <!-- Card 4: Circle Level Count -->
+      <!-- Card 3: Circle Level Count -->
       <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-5 shadow-lg flex items-center space-x-4">
         <div class="p-3 bg-pink-500/10 text-pink-400 rounded-xl">
           <i class="fa-solid fa-circle-dot text-xl"></i>
@@ -155,7 +144,6 @@
             class="block w-full pl-10 pr-10 py-3 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm appearance-none cursor-pointer"
           >
             <option value="All">All Levels</option>
-            <option value="District">District Level</option>
             <option value="Zone">Zone Level</option>
             <option value="Circle">Circle Level</option>
           </select>
@@ -304,7 +292,6 @@
             required 
             class="block w-full px-4 py-2.5 bg-slate-900/60 border border-slate-750 rounded-xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           >
-            <option value="District">District</option>
             <option value="Zone">Zone</option>
             <option value="Circle">Circle</option>
           </select>
@@ -649,13 +636,11 @@
 
     function calculateStats() {
       const total = promotersList.length;
-      const districtCount = promotersList.filter(p => p.level === 'District').length;
       const zoneCount = promotersList.filter(p => p.level === 'Zone').length;
       const circleCount = promotersList.filter(p => p.level === 'Circle').length;
 
       // Animate stat counters
       animateValue(statTotal, parseInt(statTotal.textContent) || 0, total, 400);
-      animateValue(statDistrict, parseInt(statDistrict.textContent) || 0, districtCount, 400);
       animateValue(statZone, parseInt(statZone.textContent) || 0, zoneCount, 400);
       animateValue(statCircle, parseInt(statCircle.textContent) || 0, circleCount, 400);
     }
@@ -989,12 +974,7 @@
       const level = editLevelSelect.value;
       
       // Configure fields visibility
-      if (level === 'District') {
-        document.getElementById('edit-zone-container').classList.add('hidden');
-        document.getElementById('edit-circle-container').classList.add('hidden');
-        editZoneSelect.removeAttribute('required');
-        editCircleSelect.removeAttribute('required');
-      } else if (level === 'Zone') {
+      if (level === 'Zone') {
         document.getElementById('edit-zone-container').classList.remove('hidden');
         document.getElementById('edit-circle-container').classList.add('hidden');
         editZoneSelect.setAttribute('required', 'required');

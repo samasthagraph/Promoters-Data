@@ -211,9 +211,13 @@ app.post('/api/promoters', async (req, res) => {
     return res.status(400).json({ error: 'fields', message: 'Name, WhatsApp number, and level are required.' });
   }
 
+  if (level !== 'Zone' && level !== 'Circle') {
+    return res.status(400).json({ error: 'level', message: 'Level must be Zone or Circle.' });
+  }
+
   const finalId = id || 'p_' + Date.now();
   const district = hierarchy?.district || null;
-  const zone = (level === 'Zone' || level === 'Circle') ? (hierarchy?.zone || null) : null;
+  const zone = hierarchy?.zone || null;
   const circle = (level === 'Circle') ? (hierarchy?.circle || null) : null;
 
   try {
@@ -224,15 +228,7 @@ app.post('/api/promoters', async (req, res) => {
     }
 
     // B. Uniqueness validation based on level hierarchy
-    if (level === 'District') {
-      if (!district) {
-        return res.status(400).json({ error: 'district', message: 'District selection is required.' });
-      }
-      const [locRows] = await pool.query('SELECT id FROM promoters WHERE level = "District" AND district = ?', [district]);
-      if (locRows.length > 0) {
-        return res.status(400).json({ error: 'district', message: 'A promoter is already registered for this District.' });
-      }
-    } else if (level === 'Zone') {
+    if (level === 'Zone') {
       if (!district || !zone) {
         return res.status(400).json({ error: 'zone', message: 'District and Zone selections are required.' });
       }
@@ -272,8 +268,12 @@ app.put('/api/promoters/:id', async (req, res) => {
     return res.status(400).json({ error: 'fields', message: 'Name, WhatsApp number, and level are required.' });
   }
 
+  if (level !== 'Zone' && level !== 'Circle') {
+    return res.status(400).json({ error: 'level', message: 'Level must be Zone or Circle.' });
+  }
+
   const district = hierarchy?.district || null;
-  const zone = (level === 'Zone' || level === 'Circle') ? (hierarchy?.zone || null) : null;
+  const zone = hierarchy?.zone || null;
   const circle = (level === 'Circle') ? (hierarchy?.circle || null) : null;
 
   try {
@@ -284,15 +284,7 @@ app.put('/api/promoters/:id', async (req, res) => {
     }
 
     // B. Uniqueness validation based on level hierarchy (excluding current promoter)
-    if (level === 'District') {
-      if (!district) {
-        return res.status(400).json({ error: 'district', message: 'District selection is required.' });
-      }
-      const [locRows] = await pool.query('SELECT id FROM promoters WHERE level = "District" AND district = ? AND id != ?', [district, id]);
-      if (locRows.length > 0) {
-        return res.status(400).json({ error: 'district', message: 'A promoter is already registered for this District.' });
-      }
-    } else if (level === 'Zone') {
+    if (level === 'Zone') {
       if (!district || !zone) {
         return res.status(400).json({ error: 'zone', message: 'District and Zone selections are required.' });
       }
