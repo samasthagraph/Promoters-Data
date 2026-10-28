@@ -1,17 +1,23 @@
 const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve static assets from public/ folder and project root as fallback
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
 
-let pool;
+let pool = null;
+let dbInitialized = false;
+let dbInitPromise = null;
 
 // Helper to extract database connection config from env / DATABASE_URL
 function getDatabaseConfig() {
@@ -47,81 +53,11 @@ function getDatabaseConfig() {
   return { host, port, user, password, database, ssl };
 }
 
-// Initialize Database & Tables
-async function initializeDatabase() {
-  const dbConfig = getDatabaseConfig();
-  console.log(`🔌 Connecting to MySQL database at ${dbConfig.host}:${dbConfig.port} (DB: ${dbConfig.database}, User: ${dbConfig.user}, SSL: ${dbConfig.ssl ? 'Enabled' : 'Disabled'})...`);
-
-  try {
-    // 1. Check direct connection to database
-    let connection;
-    try {
-      connection = await mysql.createConnection({
-        host: dbConfig.host,
-        port: dbConfig.port,
-        user: dbConfig.user,
-        password: dbConfig.password,
-        database: dbConfig.database,
-        ssl: dbConfig.ssl
-      });
-    } catch (connErr) {
-      // If DB doesn't exist on local server, attempt creating it (only on local environments)
-      if (connErr.code === 'ER_BAD_DB_ERROR' && (dbConfig.host === '127.0.0.1' || dbConfig.host === 'localhost')) {
-        console.log(`Creating database '${dbConfig.database}' locally...`);
-        const rootConn = await mysql.createConnection({
-          host: dbConfig.host,
-          port: dbConfig.port,
-          user: dbConfig.user,
-          password: dbConfig.password,
-          ssl: dbConfig.ssl
-        });
-        await rootConn.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\`;`);
-        await rootConn.end();
-
-        connection = await mysql.createConnection({
-          host: dbConfig.host,
-          port: dbConfig.port,
-          user: dbConfig.user,
-          password: dbConfig.password,
-          database: dbConfig.database,
-          ssl: dbConfig.ssl
-        });
-      } else {
-        throw connErr;
-      }
-    }
-
-    // 2. Ensure promoters table exists
-    const createPromotersTableQuery = `
-      CREATE TABLE IF NOT EXISTS promoters (
-        id VARCHAR(50) PRIMARY KEY,
-        fullName VARCHAR(255) NOT NULL,
-        mobileNumber VARCHAR(15) NOT NULL,
-        level ENUM('District', 'Zone', 'Circle') NOT NULL,
-        district VARCHAR(100) NOT NULL,
-        zone VARCHAR(100) DEFAULT NULL,
-        circle VARCHAR(100) DEFAULT NULL,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        UNIQUE KEY unique_mobile (mobileNumber)
-      );
-    `;
-    await connection.query(createPromotersTableQuery);
-
-    // 3. Ensure hierarchy_locations table exists
-    const createHierarchyTableQuery = `
-      CREATE TABLE IF NOT EXISTS hierarchy_locations (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        district VARCHAR(100) NOT NULL,
-        zone VARCHAR(100) NOT NULL,
-        circle VARCHAR(100) NOT NULL
-      );
-    `;
-    await connection.query(createHierarchyTableQuery);
-    await connection.end();
-
-    console.log(`✅ Database connected successfully! Verified 'promoters' and 'hierarchy_locations' tables.`);
-
-    // 4. Create connection pool for handling API requests
+// Lazy Pool Initializer (Reused across serverless function invocations)
+function getPool() {
+  if (!pool) {
+    const dbConfig = getDatabaseConfig();
+    console.log(`🔌 Initializing MySQL pool: ${dbConfig.host}:${dbConfig.port} (DB: ${dbConfig.database}, User: ${dbConfig.user}, SSL: ${dbConfig.ssl ? 'Enabled' : 'Disabled'})`);
     pool = mysql.createPool({
       host: dbConfig.host,
       port: dbConfig.port,
@@ -134,14 +70,50 @@ async function initializeDatabase() {
       queueLimit: 0,
       connectTimeout: 20000
     });
-
-  } catch (error) {
-    console.error('❌ Failed to initialize database:');
-    console.error(`   Error Code: ${error.code || 'UNKNOWN'}`);
-    console.error(`   Message:    ${error.message}`);
-    console.error('   Please check your DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, and DB_NAME environment variables.');
-    process.exit(1);
   }
+  return pool;
+}
+
+// Ensure database tables exist (Runs once lazily)
+async function ensureDatabase() {
+  if (dbInitialized) return;
+  if (!dbInitPromise) {
+    dbInitPromise = (async () => {
+      const dbPool = getPool();
+      try {
+        // 1. Ensure promoters table exists
+        await dbPool.query(`
+          CREATE TABLE IF NOT EXISTS promoters (
+            id VARCHAR(50) PRIMARY KEY,
+            fullName VARCHAR(255) NOT NULL,
+            mobileNumber VARCHAR(15) NOT NULL,
+            level ENUM('District', 'Zone', 'Circle') NOT NULL,
+            district VARCHAR(100) NOT NULL,
+            zone VARCHAR(100) DEFAULT NULL,
+            circle VARCHAR(100) DEFAULT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_mobile (mobileNumber)
+          );
+        `);
+
+        // 2. Ensure hierarchy_locations table exists
+        await dbPool.query(`
+          CREATE TABLE IF NOT EXISTS hierarchy_locations (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            district VARCHAR(100) NOT NULL,
+            zone VARCHAR(100) NOT NULL,
+            circle VARCHAR(100) NOT NULL
+          );
+        `);
+
+        dbInitialized = true;
+        console.log(`✅ Database tables verified successfully.`);
+      } catch (err) {
+        console.warn('⚠️ Table verification note:', err.message);
+      }
+    })();
+  }
+  await dbInitPromise;
 }
 
 // Helper to map DB rows to JSON payload structures expected by client
@@ -161,13 +133,27 @@ function mapRowToPromoter(row) {
 }
 
 // ==========================================
-// REST API Endpoints
+// API Router (Mounted on both /api and /)
 // ==========================================
+const apiRouter = express.Router();
+
+// Middleware to ensure DB connection is ready before querying
+apiRouter.use(async (req, res, next) => {
+  try {
+    getPool();
+    await ensureDatabase();
+    next();
+  } catch (err) {
+    console.error('Database connection error in apiRouter:', err);
+    return res.status(500).json({ error: 'database', message: 'Database connection failed.' });
+  }
+});
 
 // 0. GET HIERARCHY LOCATIONS
-app.get('/api/hierarchy', async (req, res) => {
+apiRouter.get('/hierarchy', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT district, zone, circle FROM hierarchy_locations ORDER BY district, zone, circle');
+    const dbPool = getPool();
+    const [rows] = await dbPool.query('SELECT district, zone, circle FROM hierarchy_locations ORDER BY district, zone, circle');
     const hierarchy = {};
     
     rows.forEach(row => {
@@ -193,9 +179,10 @@ app.get('/api/hierarchy', async (req, res) => {
 });
 
 // 1. GET ALL PROMOTERS
-app.get('/api/promoters', async (req, res) => {
+apiRouter.get('/promoters', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM promoters ORDER BY timestamp DESC');
+    const dbPool = getPool();
+    const [rows] = await dbPool.query('SELECT * FROM promoters ORDER BY timestamp DESC');
     res.json(rows.map(mapRowToPromoter));
   } catch (error) {
     console.error('GET /api/promoters error:', error);
@@ -204,7 +191,7 @@ app.get('/api/promoters', async (req, res) => {
 });
 
 // 2. CREATE A PROMOTER
-app.post('/api/promoters', async (req, res) => {
+apiRouter.post('/promoters', async (req, res) => {
   const { id, fullName, mobileNumber, level, hierarchy } = req.body;
 
   if (!fullName || !mobileNumber || !level) {
@@ -221,8 +208,10 @@ app.post('/api/promoters', async (req, res) => {
   const circle = (level === 'Circle') ? (hierarchy?.circle || null) : null;
 
   try {
+    const dbPool = getPool();
+
     // A. Unique mobile/whatsapp number check
-    const [mobileRows] = await pool.query('SELECT id FROM promoters WHERE mobileNumber = ?', [mobileNumber]);
+    const [mobileRows] = await dbPool.query('SELECT id FROM promoters WHERE mobileNumber = ?', [mobileNumber]);
     if (mobileRows.length > 0) {
       return res.status(400).json({ error: 'mobileNumber', message: 'This WhatsApp number is already registered.' });
     }
@@ -232,7 +221,7 @@ app.post('/api/promoters', async (req, res) => {
       if (!district || !zone) {
         return res.status(400).json({ error: 'zone', message: 'District and Zone selections are required.' });
       }
-      const [locRows] = await pool.query('SELECT id FROM promoters WHERE level = "Zone" AND district = ? AND zone = ?', [district, zone]);
+      const [locRows] = await dbPool.query('SELECT id FROM promoters WHERE level = "Zone" AND district = ? AND zone = ?', [district, zone]);
       if (locRows.length > 0) {
         return res.status(400).json({ error: 'zone', message: 'A promoter is already registered for this Zone.' });
       }
@@ -240,14 +229,14 @@ app.post('/api/promoters', async (req, res) => {
       if (!district || !zone || !circle) {
         return res.status(400).json({ error: 'circle', message: 'District, Zone, and Circle selections are required.' });
       }
-      const [locRows] = await pool.query('SELECT id FROM promoters WHERE level = "Circle" AND district = ? AND zone = ? AND circle = ?', [district, zone, circle]);
+      const [locRows] = await dbPool.query('SELECT id FROM promoters WHERE level = "Circle" AND district = ? AND zone = ? AND circle = ?', [district, zone, circle]);
       if (locRows.length > 0) {
         return res.status(400).json({ error: 'circle', message: 'A promoter is already registered for this Circle.' });
       }
     }
 
     // C. Perform Insert
-    await pool.query(
+    await dbPool.query(
       'INSERT INTO promoters (id, fullName, mobileNumber, level, district, zone, circle) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [finalId, fullName, mobileNumber, level, district, zone, circle]
     );
@@ -260,7 +249,7 @@ app.post('/api/promoters', async (req, res) => {
 });
 
 // 3. EDIT AN EXISTING PROMOTER
-app.put('/api/promoters/:id', async (req, res) => {
+apiRouter.put('/promoters/:id', async (req, res) => {
   const { id } = req.params;
   const { fullName, mobileNumber, level, hierarchy } = req.body;
 
@@ -277,8 +266,10 @@ app.put('/api/promoters/:id', async (req, res) => {
   const circle = (level === 'Circle') ? (hierarchy?.circle || null) : null;
 
   try {
+    const dbPool = getPool();
+
     // A. Unique mobile/whatsapp number check (excluding current promoter)
-    const [mobileRows] = await pool.query('SELECT id FROM promoters WHERE mobileNumber = ? AND id != ?', [mobileNumber, id]);
+    const [mobileRows] = await dbPool.query('SELECT id FROM promoters WHERE mobileNumber = ? AND id != ?', [mobileNumber, id]);
     if (mobileRows.length > 0) {
       return res.status(400).json({ error: 'mobileNumber', message: 'This WhatsApp number is already registered to another promoter.' });
     }
@@ -288,7 +279,7 @@ app.put('/api/promoters/:id', async (req, res) => {
       if (!district || !zone) {
         return res.status(400).json({ error: 'zone', message: 'District and Zone selections are required.' });
       }
-      const [locRows] = await pool.query('SELECT id FROM promoters WHERE level = "Zone" AND district = ? AND zone = ? AND id != ?', [district, zone, id]);
+      const [locRows] = await dbPool.query('SELECT id FROM promoters WHERE level = "Zone" AND district = ? AND zone = ? AND id != ?', [district, zone, id]);
       if (locRows.length > 0) {
         return res.status(400).json({ error: 'zone', message: 'A promoter is already registered for this Zone.' });
       }
@@ -296,14 +287,14 @@ app.put('/api/promoters/:id', async (req, res) => {
       if (!district || !zone || !circle) {
         return res.status(400).json({ error: 'circle', message: 'District, Zone, and Circle selections are required.' });
       }
-      const [locRows] = await pool.query('SELECT id FROM promoters WHERE level = "Circle" AND district = ? AND zone = ? AND circle = ? AND id != ?', [district, zone, circle, id]);
+      const [locRows] = await dbPool.query('SELECT id FROM promoters WHERE level = "Circle" AND district = ? AND zone = ? AND circle = ? AND id != ?', [district, zone, circle, id]);
       if (locRows.length > 0) {
         return res.status(400).json({ error: 'circle', message: 'A promoter is already registered for this Circle.' });
       }
     }
 
     // C. Perform Update
-    const [result] = await pool.query(
+    const [result] = await dbPool.query(
       'UPDATE promoters SET fullName = ?, mobileNumber = ?, level = ?, district = ?, zone = ?, circle = ? WHERE id = ?',
       [fullName, mobileNumber, level, district, zone, circle, id]
     );
@@ -320,10 +311,11 @@ app.put('/api/promoters/:id', async (req, res) => {
 });
 
 // 4. DELETE A PROMOTER BY ID
-app.delete('/api/promoters/:id', async (req, res) => {
+apiRouter.delete('/promoters/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const [result] = await pool.query('DELETE FROM promoters WHERE id = ?', [id]);
+    const dbPool = getPool();
+    const [result] = await dbPool.query('DELETE FROM promoters WHERE id = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Promoter not found.' });
     }
@@ -335,9 +327,10 @@ app.delete('/api/promoters/:id', async (req, res) => {
 });
 
 // 5. DELETE ALL PROMOTERS (CLEAR)
-app.delete('/api/promoters', async (req, res) => {
+apiRouter.delete('/promoters', async (req, res) => {
   try {
-    await pool.query('DELETE FROM promoters');
+    const dbPool = getPool();
+    await dbPool.query('DELETE FROM promoters');
     res.json({ message: 'All promoters cleared successfully.' });
   } catch (error) {
     console.error('DELETE /api/promoters error:', error);
@@ -346,7 +339,7 @@ app.delete('/api/promoters', async (req, res) => {
 });
 
 // 6. ADMIN AUTHENTICATION LOGIN
-app.post('/api/admin/login', (req, res) => {
+apiRouter.post('/admin/login', (req, res) => {
   const { username, password } = req.body;
   const validUser = process.env.ADMIN_USERNAME || 'graphadmin';
   const validPass = process.env.ADMIN_PASSWORD || 'graph951';
@@ -363,9 +356,42 @@ app.post('/api/admin/login', (req, res) => {
   return res.status(401).json({ success: false, error: 'Invalid username or password.' });
 });
 
-// Start Server after database initialization
-initializeDatabase().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server is running at http://localhost:${PORT}`);
+// Mount apiRouter on both /api and / to handle direct calls and Vercel path rewrites seamlessly
+app.use('/api', apiRouter);
+app.use('/', apiRouter);
+
+// Frontend Page Routes
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'), (err) => {
+    if (err) res.sendFile(path.join(__dirname, 'admin.html'));
   });
 });
+
+app.get('/admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'), (err) => {
+    if (err) res.sendFile(path.join(__dirname, 'admin.html'));
+  });
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'), (err) => {
+    if (err) res.sendFile(path.join(__dirname, 'index.html'));
+  });
+});
+
+// Export Express app for Vercel Serverless Function
+module.exports = app;
+
+// Start server only when run directly (local development)
+if (require.main === module) {
+  ensureDatabase().then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running at http://localhost:${PORT}`);
+    });
+  }).catch((err) => {
+    console.error('Could not initialize database on start:', err);
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running at http://localhost:${PORT} (offline mode)`);
+    });
+  });
+}
