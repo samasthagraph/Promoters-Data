@@ -21,17 +21,20 @@ let dbInitPromise = null;
 
 // Helper to extract database connection config from env / DATABASE_URL
 function getDatabaseConfig() {
-  if (process.env.DATABASE_URL) {
+  const cleanStr = (val) => (val ? String(val).trim().replace(/^["']|["']$/g, '') : '');
+
+  let dbUrlStr = cleanStr(process.env.DATABASE_URL);
+  if (dbUrlStr) {
     try {
-      const dbUrl = new URL(process.env.DATABASE_URL);
+      const dbUrl = new URL(dbUrlStr);
       const isLocal = dbUrl.hostname === '127.0.0.1' || dbUrl.hostname === 'localhost';
       return {
         host: dbUrl.hostname,
         port: parseInt(dbUrl.port, 10) || 3306,
         user: decodeURIComponent(dbUrl.username),
         password: decodeURIComponent(dbUrl.password),
-        database: dbUrl.pathname.replace(/^\//, '') || process.env.DB_NAME || 'promotersdatadb',
-        ssl: (process.env.DB_SSL === 'true' || (!isLocal && process.env.DB_SSL !== 'false')) 
+        database: dbUrl.pathname.replace(/^\//, '') || cleanStr(process.env.DB_NAME) || 'promotersdatadb',
+        ssl: (cleanStr(process.env.DB_SSL) === 'true' || (!isLocal && cleanStr(process.env.DB_SSL) !== 'false')) 
           ? { rejectUnauthorized: false } 
           : undefined
       };
@@ -40,13 +43,13 @@ function getDatabaseConfig() {
     }
   }
 
-  const host = process.env.DB_HOST || '127.0.0.1';
-  const port = parseInt(process.env.DB_PORT, 10) || (host.includes('aiven') ? 18515 : 3306);
-  const user = process.env.DB_USER || (host.includes('aiven') ? 'avnadmin' : 'root');
-  const password = process.env.DB_PASSWORD || '';
-  const database = process.env.DB_NAME || 'promotersdatadb';
+  const host = cleanStr(process.env.DB_HOST) || 'promotorsdb01-sparavoor.k.aivencloud.com';
+  const port = parseInt(cleanStr(process.env.DB_PORT), 10) || (host.includes('aiven') ? 18515 : 3306);
+  const user = cleanStr(process.env.DB_USER) || (host.includes('aiven') ? 'avnadmin' : 'root');
+  const password = cleanStr(process.env.DB_PASSWORD) || '';
+  const database = cleanStr(process.env.DB_NAME) || 'promotersdatadb';
   const isLocal = host === '127.0.0.1' || host === 'localhost';
-  const ssl = (process.env.DB_SSL === 'true' || (!isLocal && process.env.DB_SSL !== 'false'))
+  const ssl = (cleanStr(process.env.DB_SSL) === 'true' || (!isLocal && cleanStr(process.env.DB_SSL) !== 'false'))
     ? { rejectUnauthorized: false }
     : undefined;
 
@@ -139,14 +142,39 @@ const apiRouter = express.Router();
 
 // Middleware to ensure DB connection is ready before querying
 apiRouter.use(async (req, res, next) => {
+  // Allow health endpoint without blocking on DB
+  if (req.path === '/health' || req.url === '/health') {
+    return next();
+  }
   try {
     getPool();
     await ensureDatabase();
     next();
   } catch (err) {
     console.error('Database connection error in apiRouter:', err);
-    return res.status(500).json({ error: 'database', message: 'Database connection failed.' });
+    return res.status(500).json({ 
+      error: 'database', 
+      message: 'Database connection failed: ' + err.message,
+      code: err.code || 'UNKNOWN'
+    });
   }
+});
+
+// Diagnostic Health Check Endpoint
+apiRouter.get('/health', (req, res) => {
+  const dbConfig = getDatabaseConfig();
+  res.json({
+    status: 'ok',
+    databaseHost: dbConfig.host,
+    databasePort: dbConfig.port,
+    databaseUser: dbConfig.user,
+    databaseName: dbConfig.database,
+    sslEnabled: !!dbConfig.ssl,
+    hasDatabaseUrl: !!process.env.DATABASE_URL,
+    hasDbHost: !!process.env.DB_HOST,
+    hasDbPassword: !!process.env.DB_PASSWORD,
+    time: new Date().toISOString()
+  });
 });
 
 // 0. GET HIERARCHY LOCATIONS
@@ -174,7 +202,11 @@ apiRouter.get('/hierarchy', async (req, res) => {
     res.json({ hierarchy, count: rows.length, list: rows });
   } catch (error) {
     console.error('GET /api/hierarchy error:', error);
-    res.status(500).json({ error: 'Failed to retrieve hierarchy locations.' });
+    res.status(500).json({ 
+      error: 'Failed to retrieve hierarchy locations.',
+      message: error.message,
+      code: error.code || 'UNKNOWN'
+    });
   }
 });
 
@@ -186,7 +218,11 @@ apiRouter.get('/promoters', async (req, res) => {
     res.json(rows.map(mapRowToPromoter));
   } catch (error) {
     console.error('GET /api/promoters error:', error);
-    res.status(500).json({ error: 'Failed to retrieve promoters.' });
+    res.status(500).json({ 
+      error: 'Failed to retrieve promoters.',
+      message: error.message,
+      code: error.code || 'UNKNOWN'
+    });
   }
 });
 
@@ -244,7 +280,7 @@ apiRouter.post('/promoters', async (req, res) => {
     res.status(201).json({ id: finalId, message: 'Promoter registered successfully.' });
   } catch (error) {
     console.error('POST /api/promoters error:', error);
-    res.status(500).json({ error: 'database', message: 'Database error occurred while saving promoter.' });
+    res.status(500).json({ error: 'database', message: 'Database error occurred: ' + (error.message || 'unknown') });
   }
 });
 
@@ -306,7 +342,7 @@ apiRouter.put('/promoters/:id', async (req, res) => {
     res.json({ message: 'Promoter details updated successfully.' });
   } catch (error) {
     console.error(`PUT /api/promoters/${id} error:`, error);
-    res.status(500).json({ error: 'database', message: 'Database error occurred while updating promoter details.' });
+    res.status(500).json({ error: 'database', message: 'Database error occurred: ' + (error.message || 'unknown') });
   }
 });
 
