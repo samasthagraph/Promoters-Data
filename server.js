@@ -46,8 +46,12 @@ function getDatabaseConfig() {
   const host = cleanStr(process.env.DB_HOST || process.env.MYSQL_HOST) || 'promotorsdb01-sparavoor.k.aivencloud.com';
   const port = parseInt(cleanStr(process.env.DB_PORT || process.env.MYSQL_PORT), 10) || (host.includes('aiven') ? 18515 : 3306);
   const user = cleanStr(process.env.DB_USER || process.env.MYSQL_USER) || (host.includes('aiven') ? 'avnadmin' : 'root');
-  const password = cleanStr(process.env.DB_PASSWORD || process.env.MYSQL_PASSWORD) || '';
-  const database = cleanStr(process.env.DB_NAME || process.env.MYSQL_DATABASE) || 'promotersdatadb';
+  const password = cleanStr(process.env.DB_PASSWORD || process.env.MYSQL_PASSWORD || process.env.Password || process.env.PASSWORD || process.env.MYSQLPASSWORD || process.env.PASS) || '';
+  
+  // Prefer promotersdatadb over generic empty 'defaultdb'
+  let rawDb = cleanStr(process.env.DB_NAME || process.env.MYSQL_DATABASE);
+  const database = (rawDb && rawDb !== 'defaultdb') ? rawDb : 'promotersdatadb';
+  
   const isLocal = host === '127.0.0.1' || host === 'localhost';
   const ssl = (cleanStr(process.env.DB_SSL || process.env.MYSQL_SSL) === 'true' || (!isLocal && cleanStr(process.env.DB_SSL || process.env.MYSQL_SSL) !== 'false'))
     ? { rejectUnauthorized: false }
@@ -169,8 +173,8 @@ apiRouter.get('/health', (req, res) => {
     databasePort: dbConfig.port,
     databaseUser: dbConfig.user,
     databaseName: dbConfig.database,
+    hasPassword: !!dbConfig.password,
     sslEnabled: !!dbConfig.ssl,
-    allEnvKeyNames: Object.keys(process.env).sort(),
     time: new Date().toISOString()
   });
 });
