@@ -163,9 +163,6 @@ apiRouter.use(async (req, res, next) => {
 // Diagnostic Health Check Endpoint
 apiRouter.get('/health', (req, res) => {
   const dbConfig = getDatabaseConfig();
-  const safeEnvKeys = Object.keys(process.env).filter(
-    k => !/secret|pass|token|auth|key/i.test(k)
-  );
   res.json({
     status: 'ok',
     databaseHost: dbConfig.host,
@@ -173,11 +170,7 @@ apiRouter.get('/health', (req, res) => {
     databaseUser: dbConfig.user,
     databaseName: dbConfig.database,
     sslEnabled: !!dbConfig.ssl,
-    hasDatabaseUrl: !!(process.env.DATABASE_URL || process.env.MYSQL_URL),
-    hasDbHost: !!(process.env.DB_HOST || process.env.MYSQL_HOST),
-    hasDbPassword: !!(process.env.DB_PASSWORD || process.env.MYSQL_PASSWORD),
-    hasMysqlPassword: !!process.env.MYSQL_PASSWORD,
-    envKeys: safeEnvKeys,
+    allEnvKeyNames: Object.keys(process.env).sort(),
     time: new Date().toISOString()
   });
 });
