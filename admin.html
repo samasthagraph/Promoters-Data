@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Samastha Graph Promoters Network</title>
+  
+  <!-- Tailwind CSS v4 CDN -->
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  
+  <!-- Plus Jakarta Sans Font for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Prevent mobile zoom on focus */
+    @media (max-width: 640px) {
+      input, select, textarea, button {
+        font-size: 16px !important;
+      }
+    }
+    .bg-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    }
+    .dark .bg-grid {
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+    .row-fade-out {
+      animation: fadeOut 0.3s ease forwards;
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.95); height: 0; padding: 0; margin: 0; border: 0; }
+    }
+  </style>
+</head>
+<body class="h-full min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between overflow-x-hidden relative bg-grid selection:bg-indigo-500 selection:text-white">
+  
+  <!-- Background Glow Accents -->
+  <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none"></div>
+  <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none"></div>
+
+  <!-- Header -->
+  <header class="w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex flex-col sm:flex-row justify-between items-center gap-3.5 z-10 border-b border-slate-800/40">
+    <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-start">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-0.5 shadow-lg shadow-indigo-500/20 flex items-center justify-center flex-shrink-0">
+          <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center text-indigo-400 font-extrabold text-sm sm:text-base">
+            SG
+          </div>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-xl font-extrabold text-white tracking-tight">Samastha Graph</h1>
+          <p class="text-[11px] sm:text-xs text-slate-400 font-medium">Promoter Management Console</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+      <!-- Back to Registration Form Button -->
+      <a href="index.html" class="flex-1 sm:flex-none justify-center px-3.5 py-2 text-xs font-semibold rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 border border-indigo-500/20 transition-all duration-200 cursor-pointer flex items-center space-x-1.5">
+        <i class="fa-solid fa-arrow-left text-[11px]"></i>
+        <span>Form</span>
+      </a>
+      <!-- Logout Button -->
+      <button id="admin-logout-btn" class="flex-1 sm:flex-none justify-center px-3.5 py-2 text-xs font-semibold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 transition-all duration-200 cursor-pointer flex items-center space-x-1.5">
+        <i class="fa-solid fa-arrow-right-from-bracket text-[11px]"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Dashboard -->
+  <main class="flex-grow w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 z-10 space-y-6 sm:space-y-8">
+    
+    <!-- Actions Bar -->
+    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3.5 bg-slate-800/30 p-3 sm:p-4 rounded-2xl border border-slate-700/40">
+      <div class="flex items-center justify-between sm:justify-start space-x-3">
+        <h3 class="text-sm sm:text-base font-bold text-white flex items-center space-x-2">
+          <span>Registered Promoters</span>
+          <span id="filtered-count-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">0</span>
+        </h3>
+      </div>
+      <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+        <!-- Copy District Total (Totals Method - No Individual Names) -->
+        <button id="copy-district-total-btn" class="col-span-2 sm:col-span-1 px-4 py-2.5 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2">
+          <i class="fa-brands fa-whatsapp text-sm"></i>
+          <span>Copy District Total (Totals Only)</span>
+        </button>
+        <!-- Copy Detailed Member List -->
+        <button id="copy-whatsapp-btn" class="px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-center space-x-1.5">
+          <i class="fa-solid fa-list text-xs text-indigo-400"></i>
+          <span>Member List</span>
+        </button>
+        <!-- Copy WhatsApp Numbers Only -->
+        <button id="copy-numbers-btn" class="px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-center space-x-1.5">
+          <i class="fa-solid fa-copy text-xs text-slate-400"></i>
+          <span>Numbers</span>
+        </button>
+        <!-- Export CSV -->
+        <button id="export-csv" class="px-3 py-2.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-center space-x-1.5">
+          <i class="fa-solid fa-file-csv text-slate-400"></i>
+          <span>CSV</span>
+        </button>
+        <!-- Clear Data -->
+        <button id="clear-all" class="col-span-2 sm:col-span-1 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 hover:text-rose-300 transition-all duration-200 cursor-pointer flex items-center justify-center space-x-1.5">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Clear Data</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Metrics Cards Grid (3-Tier View: Total, Zone, Circle) -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
+      
+      <!-- Card 1: Total Promoters -->
+      <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-4 sm:p-5 shadow-lg flex items-center space-x-4">
+        <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl flex-shrink-0">
+          <i class="fa-solid fa-users text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] sm:text-xs font-medium text-slate-400 uppercase tracking-wider">Total Registered</p>
+          <h3 id="stat-total" class="text-xl sm:text-2xl font-bold text-white mt-0.5">0</h3>
+        </div>
+      </div>
+
+      <!-- Card 2: Zone Level Count -->
+      <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-4 sm:p-5 shadow-lg flex items-center space-x-4">
+        <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl flex-shrink-0">
+          <i class="fa-solid fa-layer-group text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] sm:text-xs font-medium text-slate-400 uppercase tracking-wider">Zone Level</p>
+          <h3 id="stat-zone" class="text-xl sm:text-2xl font-bold text-white mt-0.5">0</h3>
+        </div>
+      </div>
+
+      <!-- Card 3: Circle Level Count -->
+      <div class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-4 sm:p-5 shadow-lg flex items-center space-x-4">
+        <div class="p-3 bg-pink-500/10 text-pink-400 rounded-xl flex-shrink-0">
+          <i class="fa-solid fa-circle-dot text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] sm:text-xs font-medium text-slate-400 uppercase tracking-wider">Circle Level</p>
+          <h3 id="stat-circle" class="text-xl sm:text-2xl font-bold text-white mt-0.5">0</h3>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Filters & Search Controls Card -->
+    <section class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-700/40">
+        <div class="flex items-center space-x-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+          <i class="fa-solid fa-sliders text-indigo-400"></i>
+          <span>Filter & Search Records</span>
+        </div>
+        <button id="reset-filters-btn" class="text-xs text-slate-400 hover:text-indigo-400 transition flex items-center space-x-1 cursor-pointer">
+          <i class="fa-solid fa-rotate-right text-[10px]"></i>
+          <span>Reset Filters</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5">
+        
+        <!-- Search Input -->
+        <div class="lg:col-span-4 relative rounded-xl shadow-sm">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs"></i>
+          </div>
+          <input 
+            type="text" 
+            id="search-filter" 
+            placeholder="Search name or WhatsApp number..." 
+            class="block w-full pl-9 pr-4 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-xs sm:text-sm"
+          >
+        </div>
+
+        <!-- Level Filter Dropdown -->
+        <div class="lg:col-span-2 relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-layer-group text-slate-400 text-xs"></i>
+          </div>
+          <select 
+            id="level-filter"
+            class="block w-full pl-8 pr-8 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-xs sm:text-sm appearance-none cursor-pointer"
+          >
+            <option value="All">All Levels</option>
+            <option value="Zone">Zone Level</option>
+            <option value="Circle">Circle Level</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+          </div>
+        </div>
+
+        <!-- District Filter Dropdown -->
+        <div class="lg:col-span-2 relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-location-dot text-slate-400 text-xs"></i>
+          </div>
+          <select 
+            id="district-filter"
+            class="block w-full pl-8 pr-8 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-xs sm:text-sm appearance-none cursor-pointer"
+          >
+            <option value="All">All Districts</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+          </div>
+        </div>
+
+        <!-- Zone Filter Dropdown -->
+        <div class="lg:col-span-2 relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-building text-slate-400 text-xs"></i>
+          </div>
+          <select 
+            id="zone-filter"
+            class="block w-full pl-8 pr-8 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-xs sm:text-sm appearance-none cursor-pointer"
+          >
+            <option value="All">All Zones</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+          </div>
+        </div>
+
+        <!-- Circle Filter Dropdown -->
+        <div class="lg:col-span-2 relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-circle-dot text-slate-400 text-xs"></i>
+          </div>
+          <select 
+            id="circle-filter"
+            class="block w-full pl-8 pr-8 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-xs sm:text-sm appearance-none cursor-pointer"
+          >
+            <option value="All">All Circles</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- District Level Totals Summary & Zone Breakdown Section -->
+    <section id="district-totals-section" class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl space-y-4">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-700/40">
+        <div>
+          <div class="flex items-center space-x-2">
+            <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+              <i class="fa-solid fa-chart-pie text-sm"></i>
+            </div>
+            <h3 class="text-sm sm:text-base font-bold text-white tracking-tight" id="district-summary-heading">District Totals Breakdown</h3>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">Aggregated statistics by Zone (Totals Method for official district updates)</p>
+        </div>
+        <button id="quick-copy-district-btn" class="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2">
+          <i class="fa-brands fa-whatsapp text-sm"></i>
+          <span>Copy District Total Message</span>
+        </button>
+      </div>
+
+      <!-- Zone Totals Grid -->
+      <div id="zone-breakdown-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- Dynamically populated zone breakdown cards -->
+      </div>
+    </section>
+
+    <!-- Table of Registered Promoters -->
+    <section class="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-3xl overflow-hidden shadow-xl">
+      <div class="overflow-x-auto min-w-full">
+        
+        <!-- Desktop Table View -->
+        <table class="min-w-full divide-y divide-slate-700/50 hidden md:table">
+          <thead class="bg-slate-900/40">
+            <tr>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Promoter Name</th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">WhatsApp Number</th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Admin Level</th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Hierarchy Details</th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Reg. Date</th>
+              <th scope="col" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-400">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="promoters-tbody" class="divide-y divide-slate-800/60 bg-transparent">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+
+        <!-- Mobile Card View -->
+        <div id="promoters-mobile-container" class="md:hidden p-4 space-y-4">
+          <!-- Dynamically populated cards -->
+        </div>
+
+        <!-- Empty State View -->
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-16 px-6 text-center space-y-4">
+          <div class="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-500">
+            <i class="fa-solid fa-folder-open text-2xl"></i>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold text-white">No Promoters Found</h4>
+            <p class="text-sm text-slate-500 mt-1 max-w-sm">No registrations match your search filters or the database is currently empty.</p>
+          </div>
+          <a href="index.html" class="px-4 py-2 text-xs font-semibold rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white transition-all cursor-pointer">
+            Register a Promoter
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Clear Confirmation Dialog -->
+  <div id="clear-confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-opacity duration-300 opacity-0">
+    <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-3xl p-6 shadow-2xl relative space-y-6 transform scale-95 transition-transform duration-300">
+      
+      <div class="absolute top-0 inset-x-0 h-1.5 bg-rose-500"></div>
+
+      <div class="flex items-start space-x-4">
+        <div class="p-3 bg-rose-500/10 text-rose-500 rounded-xl">
+          <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+        </div>
+        <div class="space-y-1">
+          <h4 class="text-lg font-bold text-white">Clear All Registrations?</h4>
+          <p class="text-sm text-slate-400">Are you sure you want to delete all promoters from the registry? This action is irreversible.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3 pt-2">
+        <button id="confirm-clear" class="flex-1 py-3 px-4 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl transition text-sm cursor-pointer">
+          Yes, Clear All
+        </button>
+        <button id="cancel-clear" class="flex-1 py-3 px-4 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold rounded-xl transition text-sm cursor-pointer">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Edit Promoter Modal (Full operational logic with dependency dropdowns) -->
+  <div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-opacity duration-300 opacity-0">
+    <div class="bg-slate-800 border border-slate-700 w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl relative space-y-6 transform scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto">
+      
+      <div class="absolute top-0 inset-x-0 h-1.5 bg-indigo-500"></div>
+
+      <div class="flex justify-between items-center">
+        <h4 class="text-xl font-bold text-white">Edit Promoter details</h4>
+        <button id="close-edit" class="p-1 text-slate-400 hover:text-white transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Edit Form -->
+      <form id="edit-form" novalidate class="space-y-4">
+        <input type="hidden" id="edit-id">
+
+        <!-- Name -->
+        <div class="space-y-1.5">
+          <label for="edit-fullName" class="block text-xs font-semibold text-slate-300">Full Name</label>
+          <input 
+            type="text" 
+            id="edit-fullName" 
+            required 
+            class="block w-full px-4 py-2.5 bg-slate-900/60 border border-slate-750 rounded-xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          >
+        </div>
+
+        <!-- WhatsApp Number -->
+        <div class="space-y-1.5">
+          <label for="edit-mobileNumber" class="block text-xs font-semibold text-slate-300">WhatsApp Number</label>
+          <input 
+            type="tel" 
+            id="edit-mobileNumber" 
+            required 
+            maxlength="10"
+            class="block w-full px-4 py-2.5 bg-slate-900/60 border border-slate-750 rounded-xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          >
+        </div>
+
+        <!-- Level -->
+        <div class="space-y-1.5">
+          <label for="edit-level" class="block text-xs font-semibold text-slate-300">Administrative Level</label>
+          <select 
+            id="edit-level" 
+            required 
+            class="block w-full px-4 py-2.5 bg-slate-900/60 border border-slate-750 rounded-xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="Zone">Zone</option>
+            <option value="Circle">Circle</option>
+          </select>
+        </div>
+
+        <!-- District Select -->
+        <div class="space-y-1.5" id="edit-district-container">
+          <label for="edit-district" class="block text-xs font-semibold text-slate-300">District</label>
+          <select 
+            id="edit-district" 
+            class="block w-full px-4 py-2.5 bg-slate-900/60 border border-slate-750 rounded-xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          ></select>
+        </div>
+
+        <!-- Zone Select -->
+        <div class="space-y-1.5" id="edit-zone-container">
+          <label for="edit-zone" class="block text-xs font-semibold text-slate-300">Zone</label>
+          <select 
+            id="edit-zone" 
+            class="block w-full px-4 py-2.5 bg-slate-900/60 border border-slate-750 rounded-xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50"
+          ></select>
+        </div>
+
+        <!-- Circle Select -->
+        <div class="space-y-1.5" id="edit-circle-container">
+          <label for="edit-circle" class="block text-xs font-semibold text-slate-300">Circle</label>
+          <select 
+            id="edit-circle" 
+            class="block w-full px-4 py-2.5 bg-slate-900/60 border border-slate-750 rounded-xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50"
+          ></select>
+        </div>
+
+        <div class="flex items-center space-x-3 pt-4">
+          <button type="submit" class="flex-1 py-3 px-4 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-xl transition text-sm cursor-pointer">
+            Save Changes
+          </button>
+          <button id="cancel-edit" type="button" class="flex-1 py-3 px-4 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold rounded-xl transition text-sm cursor-pointer">
+            Cancel
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Admin Authentication Modal Overlay -->
+  <div id="login-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-xl transition-all duration-300">
+    <div class="bg-slate-900/90 border border-slate-800 w-full max-w-md rounded-3xl p-8 shadow-2xl shadow-slate-950 relative overflow-hidden space-y-6">
+      
+      <!-- Top Decorative Accent Bar -->
+      <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+
+      <!-- Header / Logo -->
+      <div class="text-center space-y-2">
+        <div class="mx-auto w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-inner">
+          <i class="fa-solid fa-shield-halved text-2xl"></i>
+        </div>
+        <h3 class="text-2xl font-extrabold text-white tracking-tight">Admin Portal</h3>
+        <p class="text-xs text-slate-400">Please enter your credentials to access the admin console.</p>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" class="space-y-4">
+        
+        <!-- Username Input -->
+        <div class="space-y-1.5">
+          <label for="admin-username" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Username</label>
+          <div class="relative rounded-xl shadow-sm">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+              <i class="fa-solid fa-user text-sm"></i>
+            </div>
+            <input 
+              type="text" 
+              id="admin-username" 
+              required
+              autocomplete="username"
+              placeholder="Enter username" 
+              class="block w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            >
+          </div>
+        </div>
+
+        <!-- Password Input -->
+        <div class="space-y-1.5">
+          <label for="admin-password" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Password</label>
+          <div class="relative rounded-xl shadow-sm">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+              <i class="fa-solid fa-lock text-sm"></i>
+            </div>
+            <input 
+              type="password" 
+              id="admin-password" 
+              required
+              autocomplete="current-password"
+              placeholder="Enter password" 
+              class="block w-full pl-10 pr-11 py-3 bg-slate-950/70 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            >
+            <button 
+              type="button" 
+              id="toggle-password" 
+              class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300 cursor-pointer"
+            >
+              <i class="fa-solid fa-eye text-sm" id="eye-icon"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Error Message Container -->
+        <div id="login-error" class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center space-x-2">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span id="login-error-text">Invalid username or password.</span>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          id="login-btn"
+          class="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:to-pink-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/25 active:scale-[0.98] transition-all text-sm flex items-center justify-center space-x-2 cursor-pointer"
+        >
+          <span id="login-btn-text">Sign In</span>
+          <i class="fa-solid fa-arrow-right-to-bracket text-xs" id="login-btn-icon"></i>
+        </button>
+
+        <div class="text-center pt-2">
+          <a href="index.html" class="text-xs text-slate-400 hover:text-indigo-400 transition flex items-center justify-center space-x-1">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i>
+            <span>Return to Form</span>
+          </a>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Floating Toast Notification -->
+  <div id="toast" class="fixed bottom-4 inset-x-3 sm:inset-x-auto sm:right-6 sm:bottom-6 max-w-sm sm:max-w-md mx-auto sm:mx-0 z-[120] transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center space-x-3.5 px-4 sm:px-5 py-3 sm:py-3.5 rounded-2xl bg-slate-900/95 border border-emerald-500/40 text-white shadow-2xl backdrop-blur-md">
+    <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0" id="toast-icon-wrap">
+      <i class="fa-brands fa-whatsapp text-lg" id="toast-icon"></i>
+    </div>
+    <div>
+      <h5 class="text-xs font-bold text-white tracking-wide" id="toast-title">Copied!</h5>
+      <p class="text-[11px] text-slate-300" id="toast-message">Data copied to clipboard for WhatsApp.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="w-full py-6 text-center text-xs text-slate-500 z-10 border-t border-slate-800/40">
+    <p>&copy; 2026 Samastha Graph Network. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // --- DEFAULT / FALLBACK HIERARCHY DATA ---
+    let ADMIN_DATA = {
+      "Thiruvananthapuram": {
+        "Trivandrum Corporation": ["Cantonment Circle", "Medical College Circle", "Fort Circle"],
+        "Trivandrum Rural": ["Neyyattinkara Circle", "Nedumangad Circle", "Attingal Circle"]
+      },
+      "Kollam": {
+        "Kollam City": ["Kollam East Circle", "Kollam West Circle"],
+        "Kollam Rural": ["Karunagappally Circle", "Kottarakkara Circle", "Punalur Circle"]
+      },
+      "Pathanamthitta": {
+        "Pathanamthitta Central": ["Pathanamthitta Circle", "Adoor Circle"],
+        "Pathanamthitta North": ["Thiruvalla Circle", "Mallappally Circle"]
+      },
+      "Alappuzha": {
+        "Alappuzha North": ["Cherthala Circle", "Ambalappuzha Circle"],
+        "Alappuzha South": ["Kayamkulam Circle", "Mavelikkara Circle", "Chengannur Circle"]
+      },
+      "Kottayam": {
+        "Kottayam West": ["Kottayam Town Circle", "Changanassery Circle"],
+        "Kottayam East": ["Kanjirappally Circle", "Pala Circle", "Vaikom Circle"]
+      },
+      "Idukki": {
+        "Idukki Highrange": ["Thodupuzha Circle", "Munnar Circle"],
+        "Idukki Lowrange": ["Kattappana Circle", "Adimaly Circle"]
+      },
+      "Ernakulam": {
+        "Kochi City": ["Ernakulam Central Circle", "Mattancherry Circle", "Thrikkakara Circle"],
+        "Ernakulam Rural": ["Aluva Circle", "Perumbavoor Circle", "Muvattupuzha Circle"]
+      },
+      "Thrissur": {
+        "Thrissur City": ["Thrissur Town Circle", "Ollur Circle"],
+        "Thrissur Rural": ["Irinjalakuda Circle", "Chalakudy Circle", "Kunnamkulam Circle"]
+      },
+      "Palakkad": {
+        "Palakkad Central": ["Palakkad Circle", "Alathur Circle"],
+        "Palakkad East": ["Ottapalam Circle", "Mannarkkad Circle", "Shoranur Circle"]
+      },
+      "Malappuram": {
+        "Malappuram North": ["Manjeri Circle", "Nilambur Circle"],
+        "Malappuram South": ["Tirur Circle", "Ponnani Circle", "Kottakkal Circle"]
+      },
+      "Kozhikode": {
+        "Kozhikode City": ["Kozhikode Town Circle", "Chevayur Circle", "Medical College Calicut Circle"],
+        "Kozhikode Rural": ["Vadakara Circle", "Koyilandy Circle", "Thamarassery Circle"]
+      },
+      "Wayanad": {
+        "Wayanad North": ["Mananthavady Circle", "Sulthan Bathery Circle"],
+        "Wayanad South": ["Kalpetta Circle", "Vythiri Circle"]
+      },
+      "Kannur": {
+        "Kannur City": ["Kannur Town Circle", "Taliparamba Circle"],
+        "Kannur Rural": ["Payyannur Circle", "Thalassery Circle", "Iritty Circle"]
+      },
+      "Kasaragod": {
+        "Kasaragod North": ["Kasaragod Circle", "Kanhangad Circle"],
+        "Kasaragod South": ["Nileshwaram Circle", "Kumbla Circle"]
+      }
+    };
+
+    // --- FETCH HIERARCHY FROM DATABASE API ---
+    async function loadHierarchy() {
+      try {
+        const response = await fetch('/api/hierarchy');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.hierarchy && Object.keys(data.hierarchy).length > 0) {
+            ADMIN_DATA = data.hierarchy;
+          }
+        }
+      } catch (err) {
+        console.warn('Could not load hierarchy in admin, using default:', err);
+      }
+    }
+
+    // --- INITIAL MOCK DATA ---
+    const MOCK_PROMOTERS = [
+      {
+        id: 'p_mock1',
+        fullName: 'Ananthakrishnan Nair',
+        mobileNumber: '9447012345',
+        level: 'Circle',
+        timestamp: '2026-08-18T10:15:30.000Z',
+        hierarchy: {
+          district: 'Thiruvananthapuram',
+          zone: 'Trivandrum Corporation',
+          circle: 'Cantonment Circle'
+        }
+      },
+      {
+        id: 'p_mock2',
+        fullName: 'Fathima Sherin',
+        mobileNumber: '9846054321',
+        level: 'Zone',
+        timestamp: '2026-08-18T11:45:00.000Z',
+        hierarchy: {
+          district: 'Ernakulam',
+          zone: 'Kochi City',
+          circle: null
+        }
+      },
+      {
+        id: 'p_mock3',
+        fullName: 'Joseph Kurian',
+        mobileNumber: '9072314567',
+        level: 'District',
+        timestamp: '2026-08-17T09:20:15.000Z',
+        hierarchy: {
+          district: 'Kozhikode',
+          zone: null,
+          circle: null
+        }
+      },
+      {
+        id: 'p_mock4',
+        fullName: 'Sreedevi Pillai',
+        mobileNumber: '9946287341',
+        level: 'Circle',
+        timestamp: '2026-08-17T14:30:45.000Z',
+        hierarchy: {
+          district: 'Kollam',
+          zone: 'Kollam Rural',
+          circle: 'Kottarakkara Circle'
+        }
+      },
+      {
+        id: 'p_mock5',
+        fullName: 'Rahul Rajan',
+        mobileNumber: '9562703814',
+        level: 'Zone',
+        timestamp: '2026-08-16T16:10:00.000Z',
+        hierarchy: {
+          district: 'Kannur',
+          zone: 'Kannur City',
+          circle: null
+        }
+      }
+    ];
+
+    // No mock data auto-initialization for MySQL
+
+    // --- DOM REFERENCES ---
+    const searchInput = document.getElementById('search-filter');
+    const levelFilter = document.getElementById('level-filter');
+    const districtFilter = document.getElementById('district-filter');
+    const zoneFilter = document.getElementById('zone-filter');
+    const circleFilter = document.getElementById('circle-filter');
+    const resetFiltersBtn = document.getElementById('reset-filters-btn');
+    const filteredCountBadge = document.getElementById('filtered-count-badge');
+
+    const copyDistrictTotalBtn = document.getElementById('copy-district-total-btn');
+    const quickCopyDistrictBtn = document.getElementById('quick-copy-district-btn');
+    const copyWhatsAppBtn = document.getElementById('copy-whatsapp-btn');
+    const copyNumbersBtn = document.getElementById('copy-numbers-btn');
+    const exportBtn = document.getElementById('export-csv');
+
+    const districtTotalsSection = document.getElementById('district-totals-section');
+    const districtSummaryHeading = document.getElementById('district-summary-heading');
+    const zoneBreakdownCards = document.getElementById('zone-breakdown-cards');
+
+    const tbody = document.getElementById('promoters-tbody');
+    const mobileContainer = document.getElementById('promoters-mobile-container');
+    const emptyState = document.getElementById('empty-state');
+
+    const statTotal = document.getElementById('stat-total');
+    const statDistrict = document.getElementById('stat-district');
+    const statZone = document.getElementById('stat-zone');
+    const statCircle = document.getElementById('stat-circle');
+
+    // Toast Notification Elements
+    const toast = document.getElementById('toast');
+    const toastTitle = document.getElementById('toast-title');
+    const toastMessage = document.getElementById('toast-message');
+    const toastIcon = document.getElementById('toast-icon');
+    let toastTimeout = null;
+
+    // Modals
+    const clearConfirmModal = document.getElementById('clear-confirm-modal');
+    const clearBtn = document.getElementById('clear-all');
+    const confirmClearBtn = document.getElementById('confirm-clear');
+    const cancelClearBtn = document.getElementById('cancel-clear');
+
+    const editModal = document.getElementById('edit-modal');
+    const editForm = document.getElementById('edit-form');
+    const closeEditBtn = document.getElementById('close-edit');
+    const cancelEditBtn = document.getElementById('cancel-edit');
+    const editIdInput = document.getElementById('edit-id');
+    const editNameInput = document.getElementById('edit-fullName');
+    const editPhoneInput = document.getElementById('edit-mobileNumber');
+    const editLevelSelect = document.getElementById('edit-level');
+    const editDistrictSelect = document.getElementById('edit-district');
+    const editZoneSelect = document.getElementById('edit-zone');
+    const editCircleSelect = document.getElementById('edit-circle');
+
+    // State Variables
+    let promotersList = [];
+    let activeFilters = { search: '', level: 'All', district: 'All', zone: 'All', circle: 'All' };
+
+    // --- TOAST NOTIFICATION HELPER ---
+    function showToast(title, message, iconClass = 'fa-brands fa-whatsapp') {
+      if (!toast) return;
+      if (toastTimeout) clearTimeout(toastTimeout);
+
+      toastTitle.textContent = title;
+      toastMessage.textContent = message;
+      toastIcon.className = `${iconClass} text-lg`;
+
+      toast.classList.remove('opacity-0', 'translate-y-24', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-24', 'pointer-events-none');
+      }, 3500);
+    }
+
+    // --- CLIPBOARD HELPER ---
+    async function copyToClipboard(text, title, message) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          showToast(title, message);
+          return true;
+        }
+      } catch (err) {
+        console.warn('Navigator clipboard failed, using fallback copy:', err);
+      }
+
+      // Fallback using textarea execCommand
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        if (successful) {
+          showToast(title, message);
+          return true;
+        }
+      } catch (err) {
+        console.error('Fallback copy error:', err);
+      }
+      alert('Could not copy to clipboard automatically. Please copy manually.');
+      return false;
+    }
+
+    // --- RETRIEVE & PROCESS DATA ---
+    async function loadData() {
+      await loadHierarchy();
+      try {
+        const response = await fetch('/api/promoters');
+        if (response.ok) {
+          promotersList = await response.json();
+        } else {
+          console.error('Failed to load promoters from server');
+          promotersList = [];
+        }
+      } catch (err) {
+        console.error('Error reading data from MySQL backend:', err);
+        promotersList = [];
+      }
+      populateDistrictFilterDropdown();
+      populateZoneFilterDropdown();
+      populateCircleFilterDropdown();
+      calculateStats();
+      renderDashboard();
+    }
+
+    function calculateStats() {
+      const total = promotersList.length;
+      const zoneCount = promotersList.filter(p => p.level === 'Zone').length;
+      const circleCount = promotersList.filter(p => p.level === 'Circle').length;
+
+      // Animate stat counters
+      animateValue(statTotal, parseInt(statTotal.textContent) || 0, total, 400);
+      animateValue(statZone, parseInt(statZone.textContent) || 0, zoneCount, 400);
+      animateValue(statCircle, parseInt(statCircle.textContent) || 0, circleCount, 400);
+    }
+
+    function animateValue(obj, start, end, duration) {
+      if (start === end) {
+        obj.textContent = end;
+        return;
+      }
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.textContent = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        } else {
+          obj.textContent = end;
+        }
+      };
+      window.requestAnimationFrame(step);
+    }
+
+    // --- DYNAMIC FILTER DROPDOWNS ---
+    function populateDistrictFilterDropdown() {
+      const activeDistrictFilter = districtFilter.value;
+      const dbDistricts = promotersList.map(p => p.hierarchy.district).filter(Boolean);
+      const hierarchyDistricts = Object.keys(ADMIN_DATA);
+      const uniqueDistricts = [...new Set([...dbDistricts, ...hierarchyDistricts])].sort();
+      
+      districtFilter.innerHTML = '<option value="All">All Districts</option>';
+      uniqueDistricts.forEach(d => {
+        const option = document.createElement('option');
+        option.value = d;
+        option.textContent = d;
+        districtFilter.appendChild(option);
+      });
+
+      if (uniqueDistricts.includes(activeDistrictFilter)) {
+        districtFilter.value = activeDistrictFilter;
+      } else {
+        districtFilter.value = 'All';
+        activeFilters.district = 'All';
+      }
+    }
+
+    function populateZoneFilterDropdown() {
+      const selectedDistrict = activeFilters.district;
+      const activeZoneFilter = zoneFilter.value;
+      let availableZones = [];
+
+      if (selectedDistrict !== 'All' && ADMIN_DATA[selectedDistrict]) {
+        availableZones = Object.keys(ADMIN_DATA[selectedDistrict]).sort();
+      } else {
+        // Collect all zones across all districts
+        const allZonesSet = new Set();
+        Object.keys(ADMIN_DATA).forEach(d => {
+          Object.keys(ADMIN_DATA[d] || {}).forEach(z => allZonesSet.add(z));
+        });
+        promotersList.forEach(p => {
+          if (p.hierarchy.zone) allZonesSet.add(p.hierarchy.zone);
+        });
+        availableZones = [...allZonesSet].sort();
+      }
+
+      zoneFilter.innerHTML = '<option value="All">All Zones</option>';
+      availableZones.forEach(z => {
+        const option = document.createElement('option');
+        option.value = z;
+        option.textContent = z;
+        zoneFilter.appendChild(option);
+      });
+
+      if (availableZones.includes(activeZoneFilter)) {
+        zoneFilter.value = activeZoneFilter;
+      } else {
+        zoneFilter.value = 'All';
+        activeFilters.zone = 'All';
+      }
+    }
+
+    function populateCircleFilterDropdown() {
+      const selectedDistrict = activeFilters.district;
+      const selectedZone = activeFilters.zone;
+      const activeCircleFilter = circleFilter.value;
+      let availableCircles = [];
+
+      if (selectedDistrict !== 'All' && selectedZone !== 'All' && ADMIN_DATA[selectedDistrict]?.[selectedZone]) {
+        availableCircles = [...ADMIN_DATA[selectedDistrict][selectedZone]].sort();
+      } else if (selectedZone !== 'All') {
+        // Collect circles for this zone across districts
+        const circlesSet = new Set();
+        Object.keys(ADMIN_DATA).forEach(d => {
+          if (ADMIN_DATA[d]?.[selectedZone]) {
+            ADMIN_DATA[d][selectedZone].forEach(c => circlesSet.add(c));
+          }
+        });
+        availableCircles = [...circlesSet].sort();
+      } else if (selectedDistrict !== 'All' && ADMIN_DATA[selectedDistrict]) {
+        // Collect all circles in this district
+        const circlesSet = new Set();
+        Object.keys(ADMIN_DATA[selectedDistrict]).forEach(z => {
+          ADMIN_DATA[selectedDistrict][z].forEach(c => circlesSet.add(c));
+        });
+        availableCircles = [...circlesSet].sort();
+      } else {
+        // Collect all circles everywhere
+        const circlesSet = new Set();
+        Object.keys(ADMIN_DATA).forEach(d => {
+          Object.keys(ADMIN_DATA[d] || {}).forEach(z => {
+            (ADMIN_DATA[d][z] || []).forEach(c => circlesSet.add(c));
+          });
+        });
+        promotersList.forEach(p => {
+          if (p.hierarchy.circle) circlesSet.add(p.hierarchy.circle);
+        });
+        availableCircles = [...circlesSet].sort();
+      }
+
+      circleFilter.innerHTML = '<option value="All">All Circles</option>';
+      availableCircles.forEach(c => {
+        const option = document.createElement('option');
+        option.value = c;
+        option.textContent = c;
+        circleFilter.appendChild(option);
+      });
+
+      if (availableCircles.includes(activeCircleFilter)) {
+        circleFilter.value = activeCircleFilter;
+      } else {
+        circleFilter.value = 'All';
+        activeFilters.circle = 'All';
+      }
+    }
+
+    // --- GET FILTERED PROMOTERS LIST ---
+    function getFilteredPromoters() {
+      return promotersList.filter(p => {
+        // Search Filter (Name or WhatsApp Number)
+        const searchMatches = activeFilters.search === '' || 
+          p.fullName.toLowerCase().includes(activeFilters.search.toLowerCase()) ||
+          p.mobileNumber.includes(activeFilters.search);
+        
+        // Level Filter
+        const levelMatches = activeFilters.level === 'All' || p.level === activeFilters.level;
+
+        // District Filter
+        const districtMatches = activeFilters.district === 'All' || p.hierarchy.district === activeFilters.district;
+
+        // Zone Filter
+        const zoneMatches = activeFilters.zone === 'All' || p.hierarchy.zone === activeFilters.zone;
+
+        // Circle Filter
+        const circleMatches = activeFilters.circle === 'All' || p.hierarchy.circle === activeFilters.circle;
+
+        return searchMatches && levelMatches && districtMatches && zoneMatches && circleMatches;
+      });
+    }
+
+    // --- WHATSAPP MESSAGE FORMATTERS ---
+    function getFilterSummaryText() {
+      const parts = [];
+      if (activeFilters.district !== 'All') parts.push(`District: ${activeFilters.district}`);
+      if (activeFilters.zone !== 'All') parts.push(`Zone: ${activeFilters.zone}`);
+      if (activeFilters.circle !== 'All') parts.push(`Circle: ${activeFilters.circle}`);
+      if (activeFilters.level !== 'All') parts.push(`Level: ${activeFilters.level}`);
+      if (activeFilters.search !== '') parts.push(`Search: "${activeFilters.search}"`);
+      return parts.length > 0 ? parts.join(' | ') : 'All Promoters';
+    }
+
+    // Format District Level Total Summary (Totals Method - No Individual Names)
+    function formatDistrictTotalWhatsAppText(districtName, list) {
+      const timestampStr = new Date().toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+
+      const totalCount = list.length;
+      const zoneCount = list.filter(p => p.level === 'Zone').length;
+      const circleCount = list.filter(p => p.level === 'Circle').length;
+
+      // Group promoters by Zone
+      const zoneMap = {};
+      list.forEach(p => {
+        const zName = p.hierarchy.zone || 'General / Unassigned Zone';
+        if (!zoneMap[zName]) {
+          zoneMap[zName] = { total: 0, zoneLevel: 0, circleLevel: 0 };
+        }
+        zoneMap[zName].total++;
+        if (p.level === 'Zone') zoneMap[zName].zoneLevel++;
+        if (p.level === 'Circle') zoneMap[zName].circleLevel++;
+      });
+
+      const targetDistrict = districtName === 'All' ? 'ALL DISTRICTS (State Total)' : districtName;
+
+      let msg = `📢 *SAMASTHA GRAPH PROMOTERS UPDATE*\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `📍 *District:* ${targetDistrict}\n`;
+      msg += `👥 *Total Promoters:* ${totalCount}\n`;
+      msg += `🏷️ *Zone Level:* ${zoneCount}\n`;
+      msg += `⭕ *Circle Level:* ${circleCount}\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+      msg += `🏛️ *ZONE BREAKDOWN (TOTALS):*\n`;
+      const zoneNames = Object.keys(zoneMap).sort();
+      if (zoneNames.length === 0) {
+        msg += `_No registrations found under this selection._\n`;
+      } else {
+        zoneNames.forEach((zName, i) => {
+          const z = zoneMap[zName];
+          msg += `${i + 1}. *${zName}*: ${z.total} Promoters\n`;
+          msg += `   • Zone Level: ${z.zoneLevel} | Circle Level: ${z.circleLevel}\n`;
+        });
+      }
+
+      msg += `\n━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `📅 *Generated:* ${timestampStr}\n`;
+      msg += `_Samastha Graph Network_`;
+      return msg;
+    }
+
+    function formatSinglePromoterWhatsAppText(p) {
+      let text = `*SAMASTHA GRAPH PROMOTER DETAILS*\n`;
+      text += `━━━━━━━━━━━━━━━━━━━━\n`;
+      text += `👤 *Name:* ${p.fullName}\n`;
+      text += `📱 *WhatsApp:* +91 ${p.mobileNumber}\n`;
+      text += `🏷️ *Level:* ${p.level}\n`;
+      text += `📍 *District:* ${p.hierarchy.district || 'N/A'}\n`;
+      if (p.hierarchy.zone) text += `🏛️ *Zone:* ${p.hierarchy.zone}\n`;
+      if (p.hierarchy.circle) text += `⭕ *Circle:* ${p.hierarchy.circle}\n`;
+      const regDate = new Date(p.timestamp).toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      text += `📅 *Registered:* ${regDate}\n`;
+      text += `━━━━━━━━━━━━━━━━━━━━\n`;
+      text += `_Samastha Graph Network_`;
+      return text;
+    }
+
+    function formatPromotersListWhatsAppText(list) {
+      const filterSummary = getFilterSummaryText();
+      const timestampStr = new Date().toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+
+      let msg = `📢 *SAMASTHA GRAPH PROMOTERS LIST*\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `📊 *Filter:* ${filterSummary}\n`;
+      msg += `👥 *Total Count:* ${list.length} Promoters\n`;
+      msg += `📅 *Generated:* ${timestampStr}\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+      list.forEach((p, index) => {
+        msg += `${index + 1}. *${p.fullName}*\n`;
+        msg += `   📱 WhatsApp: +91 ${p.mobileNumber}\n`;
+        msg += `   🏷️ Level: ${p.level}\n`;
+        msg += `   📍 District: ${p.hierarchy.district || '-'}\n`;
+        if (p.hierarchy.zone) msg += `   🏛️ Zone: ${p.hierarchy.zone}\n`;
+        if (p.hierarchy.circle) msg += `   ⭕ Circle: ${p.hierarchy.circle}\n`;
+        msg += `\n`;
+      });
+
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `_Samastha Graph Network_`;
+      return msg;
+    }
+
+    // Copy District Total Summary (Totals Method)
+    function copyDistrictTotalWhatsApp() {
+      // Use list matching current district filter
+      const targetDistrict = activeFilters.district;
+      const districtList = targetDistrict === 'All' 
+        ? promotersList 
+        : promotersList.filter(p => p.hierarchy.district === targetDistrict);
+
+      if (districtList.length === 0) {
+        showToast('No Promoters', 'No promoter data found for this district.', 'fa-solid fa-circle-exclamation');
+        return;
+      }
+
+      const text = formatDistrictTotalWhatsAppText(targetDistrict, districtList);
+      const districtLabel = targetDistrict === 'All' ? 'State' : targetDistrict;
+      copyToClipboard(text, `${districtLabel} Totals Copied!`, `Total counts summary (no names) copied for WhatsApp.`);
+    }
+
+    // Copy single promoter WhatsApp text
+    window.copySingleWhatsApp = function(id) {
+      const p = promotersList.find(item => item.id === id);
+      if (!p) return;
+      const text = formatSinglePromoterWhatsAppText(p);
+      copyToClipboard(text, 'Copied for WhatsApp!', `Details for ${p.fullName} copied to clipboard.`);
+    };
+
+    // Copy formatted list of filtered promoters
+    function copyWhatsAppFormatted() {
+      const filtered = getFilteredPromoters();
+      if (filtered.length === 0) {
+        showToast('No Promoters', 'No promoters match current filters to copy.', 'fa-solid fa-circle-exclamation');
+        return;
+      }
+      
+      // If at district level (no zone chosen), use the Total Method by default
+      if (activeFilters.zone === 'All' && activeFilters.circle === 'All') {
+        const text = formatDistrictTotalWhatsAppText(activeFilters.district, filtered);
+        copyToClipboard(text, 'District Totals Copied!', `Summary totals formatted and copied for WhatsApp.`);
+      } else {
+        // Detailed list for Zone/Circle drill-down
+        const text = formatPromotersListWhatsAppText(filtered);
+        copyToClipboard(text, 'Member List Copied!', `${filtered.length} promoter record(s) formatted and copied.`);
+      }
+    }
+
+    // Copy list of WhatsApp numbers only
+    function copyWhatsAppNumbers() {
+      const filtered = getFilteredPromoters();
+      if (filtered.length === 0) {
+        showToast('No Promoters', 'No promoters match current filters to copy.', 'fa-solid fa-circle-exclamation');
+        return;
+      }
+      const numbers = filtered.map(p => p.mobileNumber).join(', ');
+      copyToClipboard(numbers, 'WhatsApp Numbers Copied!', `${filtered.length} WhatsApp numbers copied.`);
+    }
+
+    // --- RENDER DISTRICT TOTALS BREAKDOWN ---
+    function renderDistrictTotalsSummary() {
+      if (!zoneBreakdownCards) return;
+
+      const targetDistrict = activeFilters.district;
+      const districtList = targetDistrict === 'All' 
+        ? promotersList 
+        : promotersList.filter(p => p.hierarchy.district === targetDistrict);
+
+      if (districtSummaryHeading) {
+        districtSummaryHeading.textContent = targetDistrict === 'All'
+          ? `All Districts Breakdown (${districtList.length} Total Promoters)`
+          : `${targetDistrict} District Totals (${districtList.length} Total Promoters)`;
+      }
+
+      // Group by Zone
+      const zoneMap = {};
+      
+      // Prepopulate known zones for the selected district if available
+      if (targetDistrict !== 'All' && ADMIN_DATA[targetDistrict]) {
+        Object.keys(ADMIN_DATA[targetDistrict]).forEach(z => {
+          zoneMap[z] = { total: 0, zoneLevel: 0, circleLevel: 0 };
+        });
+      }
+
+      districtList.forEach(p => {
+        const zName = p.hierarchy.zone || 'Unassigned Zone';
+        if (!zoneMap[zName]) {
+          zoneMap[zName] = { total: 0, zoneLevel: 0, circleLevel: 0 };
+        }
+        zoneMap[zName].total++;
+        if (p.level === 'Zone') zoneMap[zName].zoneLevel++;
+        if (p.level === 'Circle') zoneMap[zName].circleLevel++;
+      });
+
+      const zoneEntries = Object.entries(zoneMap).sort((a, b) => b[1].total - a[1].total);
+      zoneBreakdownCards.innerHTML = '';
+
+      if (zoneEntries.length === 0) {
+        zoneBreakdownCards.innerHTML = `
+          <div class="col-span-full py-4 text-center text-xs text-slate-500">
+            No zone data registered yet in this district.
+          </div>
+        `;
+        return;
+      }
+
+      zoneEntries.forEach(([zName, stats]) => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 space-y-2 hover:border-slate-700 transition';
+        card.innerHTML = `
+          <div class="flex justify-between items-center">
+            <h4 class="font-bold text-white text-xs truncate" title="${zName}">${zName}</h4>
+            <span class="text-xs font-extrabold px-2 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">
+              ${stats.total}
+            </span>
+          </div>
+          <div class="flex items-center space-x-3 text-[11px] text-slate-400">
+            <div class="flex items-center space-x-1">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span>Zone: <strong class="text-slate-200 font-mono">${stats.zoneLevel}</strong></span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <span class="w-2 h-2 rounded-full bg-pink-400"></span>
+              <span>Circle: <strong class="text-slate-200 font-mono">${stats.circleLevel}</strong></span>
+            </div>
+          </div>
+        `;
+        zoneBreakdownCards.appendChild(card);
+      });
+    }
+
+    // --- RENDER FUNCTION ---
+    function renderDashboard() {
+      const filtered = getFilteredPromoters();
+      renderDistrictTotalsSummary();
+
+      // Update badge
+      if (filteredCountBadge) {
+        filteredCountBadge.textContent = `${filtered.length} / ${promotersList.length}`;
+      }
+
+      // Sort by registered timestamp descending
+      filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      // Clear current contents
+      tbody.innerHTML = '';
+      mobileContainer.innerHTML = '';
+
+      if (filtered.length === 0) {
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+        emptyState.classList.remove('flex');
+      }
+
+      // Populate Table Rows & Mobile Cards
+      filtered.forEach(p => {
+        // Table row builder
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/20 transition-all duration-150';
+        tr.setAttribute('data-id', p.id);
+
+        // Date formatter
+        const regDate = new Date(p.timestamp).toLocaleDateString('en-IN', {
+          day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+
+        // Hierarchy details compiler
+        let hierarchyHTML = '';
+        if (p.level === 'District') {
+          hierarchyHTML = `<span class="font-semibold text-slate-200">${p.hierarchy.district}</span>`;
+        } else if (p.level === 'Zone') {
+          hierarchyHTML = `
+            <div class="text-xs text-slate-400">${p.hierarchy.district}</div>
+            <div class="font-semibold text-indigo-400">${p.hierarchy.zone}</div>
+          `;
+        } else if (p.level === 'Circle') {
+          hierarchyHTML = `
+            <div class="text-[10px] text-slate-500">${p.hierarchy.district} &rarr; ${p.hierarchy.zone}</div>
+            <div class="font-semibold text-emerald-400">${p.hierarchy.circle}</div>
+          `;
+        }
+
+        // Color badge for level
+        let levelBadge = '';
+        if (p.level === 'District') {
+          levelBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">District</span>';
+        } else if (p.level === 'Zone') {
+          levelBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Zone</span>';
+        } else if (p.level === 'Circle') {
+          levelBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-pink-500/10 text-pink-400 border border-pink-500/20">Circle</span>';
+        }
+
+        const prefilledMsg = encodeURIComponent(`Assalamu Alaikum ${p.fullName}, regarding Samastha Graph Network.`);
+
+        tr.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">${p.fullName}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-mono">
+            <div class="flex items-center space-x-2 text-slate-200">
+              <i class="fa-brands fa-whatsapp text-emerald-400 text-xs"></i>
+              <span>${p.mobileNumber}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">${levelBadge}</td>
+          <td class="px-6 py-4 text-sm">${hierarchyHTML}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-400">${regDate}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1.5">
+            <a href="https://wa.me/91${p.mobileNumber}?text=${prefilledMsg}" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp" class="p-2 text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 rounded-lg border border-emerald-500/20 transition inline-flex items-center justify-center cursor-pointer">
+              <i class="fa-brands fa-whatsapp text-sm"></i>
+            </a>
+            <button onclick="copySingleWhatsApp('${p.id}')" title="Copy for WhatsApp" class="p-2 text-xs bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 rounded-lg border border-indigo-500/20 transition inline-flex items-center justify-center cursor-pointer">
+              <i class="fa-solid fa-copy text-xs"></i>
+            </button>
+            <button onclick="openEditModal('${p.id}')" title="Edit details" class="p-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition inline-flex items-center justify-center cursor-pointer">
+              <i class="fa-solid fa-pen-to-square text-xs"></i>
+            </button>
+            <button onclick="confirmDelete('${p.id}')" title="Delete record" class="p-2 text-xs bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 rounded-lg transition inline-flex items-center justify-center cursor-pointer">
+              <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        // Mobile card builder
+        const card = document.createElement('div');
+        card.className = 'bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-lg';
+        card.setAttribute('data-id', p.id);
+
+        card.innerHTML = `
+          <div class="flex justify-between items-start gap-2">
+            <div class="space-y-0.5">
+              <h4 class="font-bold text-white text-base leading-snug">${p.fullName}</h4>
+              <a href="https://wa.me/91${p.mobileNumber}?text=${prefilledMsg}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 text-xs font-mono text-emerald-400 hover:text-emerald-300 transition">
+                <i class="fa-brands fa-whatsapp text-sm"></i>
+                <span class="underline underline-offset-2">${p.mobileNumber}</span>
+              </a>
+            </div>
+            <div class="flex-shrink-0">${levelBadge}</div>
+          </div>
+          
+          <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-3 text-xs space-y-1">
+            <span class="text-slate-500 block uppercase tracking-wider text-[9px] font-bold">Hierarchy Mapping</span>
+            ${p.level === 'District' ? `<div class="text-slate-200 font-medium">${p.hierarchy.district} <span class="text-slate-500 text-[10px]">(District)</span></div>` : ''}
+            ${p.level === 'Zone' ? `<div class="text-slate-200 font-medium"><span class="text-slate-400">${p.hierarchy.district}</span> &rarr; <span class="text-indigo-400 font-semibold">${p.hierarchy.zone}</span></div>` : ''}
+            ${p.level === 'Circle' ? `<div class="text-slate-200 font-medium"><span class="text-slate-400">${p.hierarchy.district} &rarr; ${p.hierarchy.zone}</span> &rarr; <span class="text-emerald-400 font-semibold">${p.hierarchy.circle}</span></div>` : ''}
+          </div>
+
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 pt-2.5 border-t border-slate-700/40">
+            <span class="text-[11px] text-slate-400 font-mono">${regDate}</span>
+            <div class="grid grid-cols-4 gap-1.5 w-full sm:w-auto">
+              <a href="https://wa.me/91${p.mobileNumber}?text=${prefilledMsg}" target="_blank" rel="noopener noreferrer" class="py-2 px-2.5 text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-semibold rounded-xl border border-emerald-500/20 transition flex items-center justify-center space-x-1 cursor-pointer">
+                <i class="fa-brands fa-whatsapp text-xs"></i>
+                <span>Chat</span>
+              </a>
+              <button onclick="copySingleWhatsApp('${p.id}')" class="py-2 px-2.5 text-xs bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 font-semibold rounded-xl border border-indigo-500/20 transition flex items-center justify-center space-x-1 cursor-pointer">
+                <i class="fa-solid fa-copy text-[11px]"></i>
+                <span>Copy</span>
+              </button>
+              <button onclick="openEditModal('${p.id}')" title="Edit promoter" class="py-2 px-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition flex items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-pen-to-square text-xs"></i>
+              </button>
+              <button onclick="confirmDelete('${p.id}')" title="Delete promoter" class="py-2 px-2 text-xs bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-xl transition flex items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        mobileContainer.appendChild(card);
+      });
+    }
+
+    // --- REALTIME FILTER EVENT LISTENERS ---
+    searchInput.addEventListener('input', (e) => {
+      activeFilters.search = e.target.value;
+      renderDashboard();
+    });
+
+    levelFilter.addEventListener('change', (e) => {
+      activeFilters.level = e.target.value;
+      renderDashboard();
+    });
+
+    districtFilter.addEventListener('change', (e) => {
+      activeFilters.district = e.target.value;
+      activeFilters.zone = 'All';
+      activeFilters.circle = 'All';
+      populateZoneFilterDropdown();
+      populateCircleFilterDropdown();
+      renderDashboard();
+    });
+
+    zoneFilter.addEventListener('change', (e) => {
+      activeFilters.zone = e.target.value;
+      activeFilters.circle = 'All';
+      populateCircleFilterDropdown();
+      renderDashboard();
+    });
+
+    circleFilter.addEventListener('change', (e) => {
+      activeFilters.circle = e.target.value;
+      renderDashboard();
+    });
+
+    // Reset Filters Button
+    if (resetFiltersBtn) {
+      resetFiltersBtn.addEventListener('click', () => {
+        activeFilters = { search: '', level: 'All', district: 'All', zone: 'All', circle: 'All' };
+        searchInput.value = '';
+        levelFilter.value = 'All';
+        districtFilter.value = 'All';
+        populateZoneFilterDropdown();
+        populateCircleFilterDropdown();
+        zoneFilter.value = 'All';
+        circleFilter.value = 'All';
+        renderDashboard();
+        showToast('Filters Reset', 'All filter options have been cleared.', 'fa-solid fa-rotate-right');
+      });
+    }
+
+    // Copy WhatsApp Buttons
+    if (copyDistrictTotalBtn) {
+      copyDistrictTotalBtn.addEventListener('click', copyDistrictTotalWhatsApp);
+    }
+    if (quickCopyDistrictBtn) {
+      quickCopyDistrictBtn.addEventListener('click', copyDistrictTotalWhatsApp);
+    }
+    if (copyWhatsAppBtn) {
+      copyWhatsAppBtn.addEventListener('click', copyWhatsAppFormatted);
+    }
+    if (copyNumbersBtn) {
+      copyNumbersBtn.addEventListener('click', copyWhatsAppNumbers);
+    }
+
+    // --- DELETE PROMOTER ---
+    window.confirmDelete = async function(id) {
+      const row = tbody.querySelector(`tr[data-id="${id}"]`);
+      const card = mobileContainer.querySelector(`div[data-id="${id}"]`);
+      
+      try {
+        const response = await fetch(`/api/promoters/${id}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          if (row) row.classList.add('row-fade-out');
+          if (card) card.classList.add('row-fade-out');
+
+          setTimeout(async () => {
+            await loadData();
+          }, 300);
+        } else {
+          const errData = await response.json();
+          alert(errData.error || 'Failed to delete promoter.');
+        }
+      } catch (err) {
+        console.error('Error during deletion:', err);
+        alert('Could not delete promoter. Server may be offline.');
+      }
+    };
+
+    // --- CLEAR ALL LOGIC ---
+    clearBtn.addEventListener('click', () => {
+      clearConfirmModal.classList.remove('hidden');
+      clearConfirmModal.offsetHeight;
+      clearConfirmModal.classList.remove('opacity-0');
+      clearConfirmModal.querySelector('div').classList.remove('scale-95');
+      clearConfirmModal.querySelector('div').classList.add('scale-100');
+    });
+
+    function closeClearModal() {
+      clearConfirmModal.classList.add('opacity-0');
+      clearConfirmModal.querySelector('div').classList.remove('scale-100');
+      clearConfirmModal.querySelector('div').classList.add('scale-95');
+      setTimeout(() => {
+        clearConfirmModal.classList.add('hidden');
+      }, 300);
+    }
+
+    cancelClearBtn.addEventListener('click', closeClearModal);
+    
+    confirmClearBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/promoters', {
+          method: 'DELETE'
+        });
+        if (response.ok) {
+          closeClearModal();
+          await loadData();
+        } else {
+          alert('Failed to clear promoter data from database.');
+        }
+      } catch (err) {
+        console.error('Error during clear:', err);
+        alert('Could not clear database. Server may be offline.');
+      }
+    });
+
+    // --- EXPORT TO CSV ---
+    exportBtn.addEventListener('click', () => {
+      if (promotersList.length === 0) {
+        alert('No data available to export.');
+        return;
+      }
+      
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "ID,Full Name,WhatsApp Number,Admin Level,District,Zone,Circle,Registration Date\n";
+      
+      promotersList.forEach(p => {
+        const row = [
+          p.id,
+          `"${p.fullName.replace(/"/g, '""')}"`,
+          p.mobileNumber,
+          p.level,
+          p.hierarchy.district || '',
+          p.hierarchy.zone || '',
+          p.hierarchy.circle || '',
+          p.timestamp
+        ].join(",");
+        csvContent += row + "\n";
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `samastha_graph_promoters_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    // --- EDIT MODAL & FORM logic ---
+    window.openEditModal = function(id) {
+      const promoter = promotersList.find(p => p.id === id);
+      if (!promoter) return;
+
+      editIdInput.value = promoter.id;
+      editNameInput.value = promoter.fullName;
+      editPhoneInput.value = promoter.mobileNumber;
+      editLevelSelect.value = promoter.level;
+
+      // Populate edit districts
+      populateEditDistricts();
+      editDistrictSelect.value = promoter.hierarchy.district || '';
+
+      // Trigger changes to populate zones/circles based on current data
+      handleEditLevelChange();
+      if (promoter.hierarchy.zone) {
+        editZoneSelect.value = promoter.hierarchy.zone;
+        handleEditZoneChange();
+        if (promoter.hierarchy.circle) {
+          editCircleSelect.value = promoter.hierarchy.circle;
+        }
+      }
+
+      // Open Modal with Transitions
+      editModal.classList.remove('hidden');
+      editModal.offsetHeight;
+      editModal.classList.remove('opacity-0');
+      editModal.querySelector('div').classList.remove('scale-95');
+      editModal.querySelector('div').classList.add('scale-100');
+    };
+
+    function populateEditDistricts() {
+      editDistrictSelect.innerHTML = '<option value="" disabled selected>Select District</option>';
+      Object.keys(ADMIN_DATA).sort().forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        editDistrictSelect.appendChild(opt);
+      });
+    }
+
+    function handleEditLevelChange() {
+      const level = editLevelSelect.value;
+      
+      // Configure fields visibility
+      if (level === 'Zone') {
+        document.getElementById('edit-zone-container').classList.remove('hidden');
+        document.getElementById('edit-circle-container').classList.add('hidden');
+        editZoneSelect.setAttribute('required', 'required');
+        editCircleSelect.removeAttribute('required');
+      } else if (level === 'Circle') {
+        document.getElementById('edit-zone-container').classList.remove('hidden');
+        document.getElementById('edit-circle-container').classList.remove('hidden');
+        editZoneSelect.setAttribute('required', 'required');
+        editCircleSelect.setAttribute('required', 'required');
+      }
+
+      // Trigger Zone rebuild
+      handleEditDistrictChange();
+    }
+
+    function handleEditDistrictChange() {
+      const district = editDistrictSelect.value;
+      const level = editLevelSelect.value;
+      
+      editZoneSelect.innerHTML = '<option value="" disabled selected>Select Zone</option>';
+      editZoneSelect.disabled = true;
+      editCircleSelect.innerHTML = '<option value="" disabled selected>Select Circle (Select Zone first)</option>';
+      editCircleSelect.disabled = true;
+
+      if (district && (level === 'Zone' || level === 'Circle')) {
+        const zones = ADMIN_DATA[district];
+        if (zones) {
+          Object.keys(zones).forEach(z => {
+            const opt = document.createElement('option');
+            opt.value = z;
+            opt.textContent = z;
+            editZoneSelect.appendChild(opt);
+          });
+          editZoneSelect.disabled = false;
+        }
+      }
+    }
+
+    function handleEditZoneChange() {
+      const district = editDistrictSelect.value;
+      const zone = editZoneSelect.value;
+      const level = editLevelSelect.value;
+
+      editCircleSelect.innerHTML = '<option value="" disabled selected>Select Circle</option>';
+      editCircleSelect.disabled = true;
+
+      if (district && zone && level === 'Circle') {
+        const circles = ADMIN_DATA[district]?.[zone];
+        if (circles) {
+          circles.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            editCircleSelect.appendChild(opt);
+          });
+          editCircleSelect.disabled = false;
+        }
+      }
+    }
+
+    editLevelSelect.addEventListener('change', handleEditLevelChange);
+    editDistrictSelect.addEventListener('change', handleEditDistrictChange);
+    editZoneSelect.addEventListener('change', handleEditZoneChange);
+
+    function closeEditModal() {
+      editModal.classList.add('opacity-0');
+      editModal.querySelector('div').classList.remove('scale-100');
+      editModal.querySelector('div').classList.add('scale-95');
+      setTimeout(() => {
+        editModal.classList.add('hidden');
+      }, 300);
+    }
+
+    closeEditBtn.addEventListener('click', closeEditModal);
+    cancelEditBtn.addEventListener('click', closeEditModal);
+
+    // Save Edit Form
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const id = editIdInput.value;
+      const name = editNameInput.value.trim();
+      const phone = editPhoneInput.value.replace(/[^0-9]/g, '');
+      const level = editLevelSelect.value;
+
+      // Basic validations
+      if (name === '' || phone.length !== 10) {
+        alert('Please fill out all required fields with valid inputs (10-digit WhatsApp number).');
+        return;
+      }
+
+      const district = editDistrictSelect.value;
+      const zone = editZoneSelect.value;
+      const circle = editCircleSelect.value;
+
+      // Hierarchy validation
+      if (!district) {
+        alert('Please select a district.'); return;
+      }
+      if ((level === 'Zone' || level === 'Circle') && !zone) {
+        alert('Please select a zone.'); return;
+      }
+      if (level === 'Circle' && !circle) {
+        alert('Please select a circle.'); return;
+      }
+
+      const payload = {
+        fullName: name,
+        mobileNumber: phone,
+        level: level,
+        hierarchy: {
+          district: district,
+          zone: (level === 'Zone' || level === 'Circle') ? zone : null,
+          circle: level === 'Circle' ? circle : null
+        }
+      };
+
+      try {
+        const response = await fetch(`/api/promoters/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          closeEditModal();
+          await loadData();
+        } else {
+          const errData = await response.json();
+          alert(errData.message || 'Failed to update promoter details.');
+        }
+      } catch (err) {
+        console.error('Error during update:', err);
+        alert('Could not update promoter details. Server may be offline.');
+      }
+    });
+
+    // Close on overlay click
+    editModal.addEventListener('click', (e) => {
+      if (e.target === editModal) {
+        closeEditModal();
+      }
+    });
+
+    // Restrict numeric typing on phone edit input
+    editPhoneInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
+
+    // --- AUTHENTICATION & LOGIN LOGIC ---
+    const loginModal = document.getElementById('login-modal');
+    const loginForm = document.getElementById('login-form');
+    const loginError = document.getElementById('login-error');
+    const loginErrorText = document.getElementById('login-error-text');
+    const adminUsernameInput = document.getElementById('admin-username');
+    const adminPasswordInput = document.getElementById('admin-password');
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    const eyeIcon = document.getElementById('eye-icon');
+    const loginBtnText = document.getElementById('login-btn-text');
+    const loginBtnIcon = document.getElementById('login-btn-icon');
+    const adminLogoutBtn = document.getElementById('admin-logout-btn');
+
+    // Toggle Password Visibility
+    if (togglePasswordBtn) {
+      togglePasswordBtn.addEventListener('click', () => {
+        if (adminPasswordInput.type === 'password') {
+          adminPasswordInput.type = 'text';
+          eyeIcon.classList.remove('fa-eye');
+          eyeIcon.classList.add('fa-eye-slash');
+        } else {
+          adminPasswordInput.type = 'password';
+          eyeIcon.classList.remove('fa-eye-slash');
+          eyeIcon.classList.add('fa-eye');
+        }
+      });
+    }
+
+    // Check Auth State on Load
+    function checkAuthentication() {
+      const token = sessionStorage.getItem('adminAuthToken');
+      if (token) {
+        loginModal.classList.add('hidden');
+        loadData();
+      } else {
+        loginModal.classList.remove('hidden');
+      }
+    }
+
+    // Handle Login Form Submission
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = adminUsernameInput.value.trim();
+      const password = adminPasswordInput.value;
+
+      loginError.classList.add('hidden');
+      loginBtnText.textContent = 'Verifying...';
+      loginBtnIcon.className = 'fa-solid fa-spinner fa-spin text-xs';
+
+      try {
+        const response = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          sessionStorage.setItem('adminAuthToken', data.token);
+          loginModal.classList.add('hidden');
+          loadData();
+        } else {
+          // Client fallback check
+          if (username === 'graphadmin' && password === 'graph951') {
+            sessionStorage.setItem('adminAuthToken', 'local_authenticated');
+            loginModal.classList.add('hidden');
+            loadData();
+          } else {
+            loginError.classList.remove('hidden');
+            loginErrorText.textContent = data.error || 'Invalid username or password.';
+          }
+        }
+      } catch (err) {
+        // Fallback for static/offline preview
+        if (username === 'graphadmin' && password === 'graph951') {
+          sessionStorage.setItem('adminAuthToken', 'local_authenticated');
+          loginModal.classList.add('hidden');
+          loadData();
+        } else {
+          loginError.classList.remove('hidden');
+          loginErrorText.textContent = 'Invalid username or password.';
+        }
+      } finally {
+        loginBtnText.textContent = 'Sign In';
+        loginBtnIcon.className = 'fa-solid fa-arrow-right-to-bracket text-xs';
+      }
+    });
+
+    // Handle Logout
+    if (adminLogoutBtn) {
+      adminLogoutBtn.addEventListener('click', () => {
+        sessionStorage.removeItem('adminAuthToken');
+        window.location.reload();
+      });
+    }
+
+    // Initialize Auth Check
+    checkAuthentication();
+
+  </script>
+</body>
+</html>

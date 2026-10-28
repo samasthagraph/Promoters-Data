@@ -418,8 +418,8 @@ app.get('/', (req, res) => {
 // Export Express app for Vercel Serverless Function
 module.exports = app;
 
-// Start server only when run directly (local development)
-if (require.main === module) {
+// Start server only when run directly (local development, not inside Vercel)
+if (!process.env.VERCEL && require.main === module) {
   ensureDatabase().then(() => {
     app.listen(PORT, () => {
       console.log(`🚀 Server is running at http://localhost:${PORT}`);
